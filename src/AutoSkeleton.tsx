@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, ReactNode } from "react";
 import { SkeletonPrimitive } from "./SkeletonPrimitive";
 
-interface AutoSkeletonProps {
+export interface AutoSkeletonProps {
   loading: boolean;
   children: ReactNode;
   config?: {

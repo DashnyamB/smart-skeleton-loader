@@ -20,7 +20,8 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest",
-    "test:unit": "vitest --run --config vitest.unit.config.ts",
+    "test:unit": "vitest --run",
+    "test:browser": "vitest --run --config vitest.storybook.config.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -46,6 +47,7 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.2.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "@vitest/browser-playwright": "^4.0.18",

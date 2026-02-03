@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AutoSkeleton } from "../AutoSkeleton";
-import React from "react";
 import "../styles.css"; // Import the default theme styles
 
 const meta = {
@@ -67,7 +66,7 @@ const ThemeDemoBlock = ({
 );
 
 export const AllThemes: Story = {
-  args: { loading: true },
+  args: { loading: true, children: null },
   render: () => (
     <div style={{ fontFamily: "sans-serif", maxWidth: 600 }}>
       <h1>Theme Integration</h1>
@@ -102,6 +101,7 @@ export const DarkModeExplicit: Story = {
   args: {
     loading: true,
     config: { theme: "dark" },
+    children: null,
   },
   render: (args) => (
     <div style={{ background: "#000", padding: 20, borderRadius: 8 }}>
@@ -124,6 +124,7 @@ export const CustomThemeColors: Story = {
       darkColor: "#3b82f6",
       darkHighlightColor: "#60a5fa",
     },
+    children: null,
   },
   render: (args) => (
     <div

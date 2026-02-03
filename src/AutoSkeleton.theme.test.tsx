@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { AutoSkeleton } from "./AutoSkeleton";
 import { describe, it, expect } from "vitest";
