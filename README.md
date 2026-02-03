@@ -5,8 +5,18 @@
 
 [![npm version](https://img.shields.io/npm/v/react-auto-skeleton.svg)](https://www.npmjs.com/package/react-auto-skeleton)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-orange.svg?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/dashnyamkkq)
+
+<div align="center">
+
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/dashnyamkkq)
+
+</div>
 
 `react-auto-skeleton` eliminates the need to manually create and maintain skeleton versions of your components. It renders your actual component responsibly (hidden), measures its layout, and overlays precise skeletons for text, images, and containers.
+
+> [!IMPORTANT]
+> **Enjoying this project?** If you find `react-auto-skeleton` useful, please consider [buying me a coffee](https://buymeacoffee.com/dashnyamkkq) to support further development! 💖
 
 ## ✨ Features
 
