@@ -1,16 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { AutoSkeleton } from "../AutoSkeleton";
-import React, { useState } from "react";
+import type { Meta, StoryObj } from '@storybook/react';
+import React, { useState } from 'react';
+import { AutoSkeleton } from '../AutoSkeleton';
 
 const meta = {
-  title: "Components/AutoSkeleton",
+  title: 'Components/AutoSkeleton',
   component: AutoSkeleton,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
-  tags: ["autodocs"],
+  tags: ['autodocs'],
   argTypes: {
-    loading: { control: "boolean" },
+    loading: { control: 'boolean' },
   },
 } satisfies Meta<typeof AutoSkeleton>;
 
@@ -33,14 +33,14 @@ const SideBySide = ({
 }) => (
   <div
     style={{
-      display: "flex",
+      display: 'flex',
       gap: 40,
-      alignItems: "flex-start",
-      flexWrap: "wrap",
+      alignItems: 'flex-start',
+      flexWrap: 'wrap',
     }}
   >
     <div style={{ flex: 1, minWidth: 300 }}>
-      <h4 style={{ marginBottom: 10, color: "#666", fontFamily: "sans-serif" }}>
+      <h4 style={{ marginBottom: 10, color: '#666', fontFamily: 'sans-serif' }}>
         Loading State (Skeleton)
       </h4>
       <AutoSkeleton {...args} loading={true}>
@@ -48,7 +48,7 @@ const SideBySide = ({
       </AutoSkeleton>
     </div>
     <div style={{ flex: 1, minWidth: 300 }}>
-      <h4 style={{ marginBottom: 10, color: "#666", fontFamily: "sans-serif" }}>
+      <h4 style={{ marginBottom: 10, color: '#666', fontFamily: 'sans-serif' }}>
         Loaded State (Actual)
       </h4>
       <AutoSkeleton {...args} loading={false}>
@@ -63,7 +63,7 @@ export const TextBlock: Story = {
   args: { loading: true, children: null },
   render: (args) => (
     <SideBySide args={args}>
-      <div style={{ width: 400, fontFamily: "sans-serif" }}>
+      <div style={{ width: 400, fontFamily: 'sans-serif' }}>
         <h1>Heading Level 1</h1>
         <p>
           This is a paragraph of text. It has multiple lines to demonstrate how
@@ -83,29 +83,29 @@ export const ImageCard: Story = {
     <SideBySide args={args}>
       <div
         style={{
-          border: "1px solid #ddd",
+          border: '1px solid #ddd',
           borderRadius: 8,
-          overflow: "hidden",
+          overflow: 'hidden',
           width: 300,
-          fontFamily: "sans-serif",
+          fontFamily: 'sans-serif',
         }}
       >
         <img
           src={IMG_PLACEHOLDER}
           alt="Cover"
-          style={{ width: "100%", height: 200, display: "block" }}
+          style={{ width: '100%', height: 200, display: 'block' }}
         />
         <div style={{ padding: 16 }}>
           <h3 style={{ marginTop: 0 }}>Card Title</h3>
-          <p style={{ color: "#666" }}>Some description text for the card.</p>
+          <p style={{ color: '#666' }}>Some description text for the card.</p>
           <button
             style={{
-              padding: "8px 16px",
-              background: "#0ea5e9",
-              color: "white",
-              border: "none",
+              padding: '8px 16px',
+              background: '#0ea5e9',
+              color: 'white',
+              border: 'none',
               borderRadius: 4,
-              cursor: "pointer",
+              cursor: 'pointer',
             }}
           >
             Action
@@ -124,36 +124,36 @@ export const FormInputs: Story = {
       <div
         style={{
           width: 300,
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
           gap: 10,
-          fontFamily: "sans-serif",
+          fontFamily: 'sans-serif',
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <label style={{ fontSize: 14, fontWeight: 500 }}>Email</label>
           <input
             type="email"
             placeholder="john@example.com"
-            style={{ padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+            style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
           />
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <label style={{ fontSize: 14, fontWeight: 500 }}>Password</label>
           <input
             type="password"
-            style={{ padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+            style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
           />
         </div>
 
-        <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+        <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
           <button
             style={{
-              padding: "8px 16px",
-              background: "#333",
-              color: "white",
-              border: "none",
+              padding: '8px 16px',
+              background: '#333',
+              color: 'white',
+              border: 'none',
               borderRadius: 4,
             }}
           >
@@ -161,9 +161,9 @@ export const FormInputs: Story = {
           </button>
           <button
             style={{
-              padding: "8px 16px",
-              background: "transparent",
-              border: "1px solid #ccc",
+              padding: '8px 16px',
+              background: 'transparent',
+              border: '1px solid #ccc',
               borderRadius: 4,
             }}
           >
@@ -181,9 +181,9 @@ export const CustomColors: Story = {
     loading: true,
     children: null,
     config: {
-      color: "#ffc107",
-      highlightColor: "#ffecb3",
-      borderRadius: "12px",
+      color: '#ffc107',
+      highlightColor: '#ffecb3',
+      borderRadius: '12px',
     },
   },
   render: (args) => (
@@ -191,14 +191,14 @@ export const CustomColors: Story = {
       <div
         style={{
           padding: 20,
-          background: "#fff3cd",
+          background: '#fff3cd',
           borderRadius: 12,
-          fontFamily: "sans-serif",
+          fontFamily: 'sans-serif',
           width: 300,
         }}
       >
-        <h2 style={{ marginTop: 0, color: "#856404" }}>Warning Message</h2>
-        <p style={{ marginBottom: 0, color: "#856404" }}>
+        <h2 style={{ marginTop: 0, color: '#856404' }}>Warning Message</h2>
+        <p style={{ marginBottom: 0, color: '#856404' }}>
           This checks custom skeleton colors matching the alert theme.
         </p>
       </div>
@@ -210,21 +210,21 @@ export const CustomColors: Story = {
 const InteractiveDemo = () => {
   const [loading, setLoading] = useState(true);
   return (
-    <div style={{ fontFamily: "sans-serif" }}>
+    <div style={{ fontFamily: 'sans-serif' }}>
       <h3 style={{ marginBottom: 10 }}>Interactive Mode</h3>
       <button
         onClick={() => setLoading(!loading)}
-        style={{ marginBottom: 20, padding: "8px 16px", cursor: "pointer" }}
+        style={{ marginBottom: 20, padding: '8px 16px', cursor: 'pointer' }}
       >
-        <span style={{ marginRight: 8 }}>{loading ? "⏹️" : "▶️"}</span>
-        Toggle Loading: <strong>{loading ? "ON" : "OFF"}</strong>
+        <span style={{ marginRight: 8 }}>{loading ? '⏹️' : '▶️'}</span>
+        Toggle Loading: <strong>{loading ? 'ON' : 'OFF'}</strong>
       </button>
       <AutoSkeleton loading={loading}>
         <div
           style={{
-            border: "1px solid #ddd",
+            border: '1px solid #ddd',
             borderRadius: 8,
-            overflow: "hidden",
+            overflow: 'hidden',
             width: 300,
           }}
         >
@@ -232,15 +232,15 @@ const InteractiveDemo = () => {
             src={IMG_PLACEHOLDER}
             alt="Cover"
             style={{
-              width: "100%",
+              width: '100%',
               height: 150,
-              display: "block",
-              objectFit: "cover",
+              display: 'block',
+              objectFit: 'cover',
             }}
           />
           <div style={{ padding: 16 }}>
             <h4 style={{ marginTop: 0 }}>Dynamic Content</h4>
-            <p style={{ color: "#666", fontSize: 14 }}>
+            <p style={{ color: '#666', fontSize: 14 }}>
               Toggle the button above to see the transition between skeleton and
               content.
             </p>
@@ -267,20 +267,20 @@ const DataFetchingDemo = () => {
       setData([
         {
           id: 1,
-          title: "Real Item 1",
-          desc: "Description for item 1",
+          title: 'Real Item 1',
+          desc: 'Description for item 1',
           img: AVATAR_PLACEHOLDER,
         },
         {
           id: 2,
-          title: "Real Item 2",
-          desc: "Description for item 2",
+          title: 'Real Item 2',
+          desc: 'Description for item 2',
           img: AVATAR_PLACEHOLDER,
         },
         {
           id: 3,
-          title: "Real Item 3",
-          desc: "Description for item 3",
+          title: 'Real Item 3',
+          desc: 'Description for item 3',
           img: AVATAR_PLACEHOLDER,
         },
       ]);
@@ -296,13 +296,13 @@ const DataFetchingDemo = () => {
   const CardItem = ({ title, desc, img }: any) => (
     <div
       style={{
-        display: "flex",
+        display: 'flex',
         gap: 16,
-        border: "1px solid #eee",
+        border: '1px solid #eee',
         padding: 16,
         borderRadius: 8,
-        alignItems: "center",
-        fontFamily: "sans-serif",
+        alignItems: 'center',
+        fontFamily: 'sans-serif',
       }}
     >
       <img
@@ -310,22 +310,22 @@ const DataFetchingDemo = () => {
         style={{
           width: 60,
           height: 60,
-          borderRadius: "50%",
-          objectFit: "cover",
+          borderRadius: '50%',
+          objectFit: 'cover',
         }}
         alt=""
       />
       <div style={{ flex: 1 }}>
-        <h4 style={{ margin: "0 0 8px 0" }}>{title}</h4>
-        <p style={{ margin: 0, color: "#666", fontSize: 14 }}>{desc}</p>
+        <h4 style={{ margin: '0 0 8px 0' }}>{title}</h4>
+        <p style={{ margin: 0, color: '#666', fontSize: 14 }}>{desc}</p>
       </div>
       <button
         style={{
-          padding: "8px 12px",
+          padding: '8px 12px',
           borderRadius: 6,
-          border: "none",
-          background: "#eee",
-          cursor: "pointer",
+          border: 'none',
+          background: '#eee',
+          cursor: 'pointer',
         }}
       >
         View
@@ -338,21 +338,21 @@ const DataFetchingDemo = () => {
       <div
         style={{
           marginBottom: 20,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        <h3 style={{ margin: 0, fontFamily: "sans-serif" }}>User List</h3>
+        <h3 style={{ margin: 0, fontFamily: 'sans-serif' }}>User List</h3>
         <button
           onClick={fetchData}
-          style={{ padding: "6px 12px", cursor: "pointer" }}
+          style={{ padding: '6px 12px', cursor: 'pointer' }}
         >
           Refetch
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {!data
           ? // LOADING STATE:
             // Render "Template" items with dummy data wrapped in AutoSkeleton.

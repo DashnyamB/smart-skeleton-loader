@@ -36,16 +36,16 @@ _Note: `framer-motion` is a peer dependency used for the smooth pulse animations
 Wrap your component in `AutoSkeleton` and control the `loading` state.
 
 ```tsx
-import { AutoSkeleton } from "react-auto-skeleton";
+import { AutoSkeleton } from 'react-auto-skeleton';
 
 const UserProfile = ({ loading, user }) => {
   return (
     <AutoSkeleton loading={loading}>
       <div className="card">
         {/* Use a placeholder fallback so the skeleton knows the size if data is null! */}
-        <img src={user?.avatar || "/placeholder.png"} alt="Avatar" />
-        <h3>{user?.name || "Loading Name..."}</h3>
-        <p>{user?.bio || "This is a long line of text to simulate the bio."}</p>
+        <img src={user?.avatar || '/placeholder.png'} alt="Avatar" />
+        <h3>{user?.name || 'Loading Name...'}</h3>
+        <p>{user?.bio || 'This is a long line of text to simulate the bio.'}</p>
         <button>Follow</button>
       </div>
     </AutoSkeleton>
@@ -100,9 +100,9 @@ Customize the appearance via the `config` prop:
 <AutoSkeleton
   loading={true}
   config={{
-    color: "#e0e0e0", // Base color of the skeleton pulse
-    highlightColor: "#f5f5f5", // Shine color
-    borderRadius: "8px", // Global border radius (auto-detects if not set)
+    color: '#e0e0e0', // Base color of the skeleton pulse
+    highlightColor: '#f5f5f5', // Shine color
+    borderRadius: '8px', // Global border radius (auto-detects if not set)
   }}
 >
   <MyComponent />

@@ -10,12 +10,12 @@
   }
 }
 
-[data-skeleton-theme="light"] {
+[data-skeleton-theme='light'] {
   --auto-skeleton-color: #eee;
   --auto-skeleton-highlight: #f5f5f5;
 }
 
-[data-skeleton-theme="dark"] {
+[data-skeleton-theme='dark'] {
   --auto-skeleton-color: #2a2a2a;
   --auto-skeleton-highlight: #333;
 }

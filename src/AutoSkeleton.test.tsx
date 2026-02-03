@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
-import { render, screen, cleanup } from "@testing-library/react";
-import * as matchers from "@testing-library/jest-dom/matchers";
-import { AutoSkeleton } from "./AutoSkeleton";
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import * as matchers from '@testing-library/jest-dom/matchers';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AutoSkeleton } from './AutoSkeleton';
 
 expect.extend(matchers);
 
@@ -17,7 +17,7 @@ window.ResizeObserver = MockObserver;
 // @ts-ignore
 globalThis.ResizeObserver = MockObserver;
 
-describe("AutoSkeleton", () => {
+describe('AutoSkeleton', () => {
   beforeEach(() => {
     // Reset mocks
     vi.restoreAllMocks();
@@ -27,20 +27,20 @@ describe("AutoSkeleton", () => {
     cleanup();
   });
 
-  it("renders children visible when loading is false", () => {
+  it('renders children visible when loading is false', () => {
     render(
       <AutoSkeleton loading={false}>
         <div data-testid="content">Content</div>
       </AutoSkeleton>,
     );
 
-    const content = screen.getByTestId("content");
+    const content = screen.getByTestId('content');
     expect(content).toBeVisible();
     // Container visible
-    expect(content.parentElement).toHaveStyle({ visibility: "visible" });
+    expect(content.parentElement).toHaveStyle({ visibility: 'visible' });
   });
 
-  it("hides children when loading is true", () => {
+  it('hides children when loading is true', () => {
     const { getByTestId } = render(
       <AutoSkeleton loading={true}>
         <div data-testid="content">Content</div>
@@ -48,12 +48,12 @@ describe("AutoSkeleton", () => {
     );
 
     // Use scoped query to avoid interference from previous tests
-    const content = getByTestId("content");
+    const content = getByTestId('content');
     // The original content's parent wrapper sets opacity to 0 (not visibility hidden)
-    expect(content.parentElement).toHaveStyle({ opacity: "0" });
+    expect(content.parentElement).toHaveStyle({ opacity: '0' });
   });
 
-  it("generates fallback skeleton if no content is measured (default jsdom behavior)", async () => {
+  it('generates fallback skeleton if no content is measured (default jsdom behavior)', async () => {
     // In JSDOM, getBoundingClientRect returns 0.
     // Our logic says: if newSkeletons is empty AND container has size, render fallback.
     // If JSDOM says 0 size, we get nothing.

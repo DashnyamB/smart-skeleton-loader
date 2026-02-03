@@ -34,7 +34,9 @@
     "test:unit": "vitest --run",
     "test:browser": "vitest --run --config vitest.storybook.config.ts",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "author": "dashnyamb",
   "license": "MIT",
@@ -67,6 +69,8 @@
     "jsdom": "^27.4.0",
     "playwright": "^1.58.0",
     "postcss": "^8.5.6",
+    "prettier": "^3.8.1",
+    "prettier-plugin-organize-imports": "^4.3.0",
     "semantic-release": "^24.2.9",
     "storybook": "^10.2.1",
     "tailwindcss": "^4.1.18",

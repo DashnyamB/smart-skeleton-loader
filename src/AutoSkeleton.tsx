@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState, ReactNode } from "react";
-import { SkeletonPrimitive } from "./SkeletonPrimitive";
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import { SkeletonPrimitive } from './SkeletonPrimitive';
 
 export interface AutoSkeletonProps {
   loading: boolean;
@@ -8,7 +8,7 @@ export interface AutoSkeletonProps {
     color?: string;
     highlightColor?: string;
     borderRadius?: string | number;
-    theme?: "light" | "dark" | "auto";
+    theme?: 'light' | 'dark' | 'auto';
     // Theme-specific colors (override CSS variables)
     lightColor?: string;
     lightHighlightColor?: string;
@@ -22,12 +22,12 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   children,
   config,
 }) => {
-  const theme = config?.theme || "auto";
+  const theme = config?.theme || 'auto';
   const containerRef = useRef<HTMLDivElement>(null);
   const [skeletons, setSkeletons] = useState<
     Array<{
       key: string;
-      type: "primitive" | "container";
+      type: 'primitive' | 'container';
       width: number;
       height: number;
       top: number;
@@ -47,38 +47,38 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
     const getSkeletonType = (
       el: Element,
     ): {
-      type: "primitive" | "container";
+      type: 'primitive' | 'container';
       styles?: React.CSSProperties;
     } | null => {
       const tagName = el.tagName.toLowerCase();
       const style = window.getComputedStyle(el);
 
       // 1. Atomic Content (always pulse)
-      if (["img", "input", "button", "textarea", "select"].includes(tagName)) {
-        return { type: "primitive" };
+      if (['img', 'input', 'button', 'textarea', 'select'].includes(tagName)) {
+        return { type: 'primitive' };
       }
 
       // 2. Text Content (always pulse)
       const hasText = Array.from(el.childNodes).some(
         (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
       );
-      if (hasText) return { type: "primitive" };
+      if (hasText) return { type: 'primitive' };
 
       // 3. Structural Container (static clone)
       // If it has visible styles but no direct text => it's a container
       const hasBackground =
-        style.backgroundColor !== "rgba(0, 0, 0, 0)" &&
-        style.backgroundColor !== "transparent";
+        style.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+        style.backgroundColor !== 'transparent';
       const hasBorder =
-        style.borderWidth !== "0px" &&
-        style.borderStyle !== "none" &&
-        style.borderColor !== "rgba(0, 0, 0, 0)" &&
-        style.borderColor !== "transparent";
-      const hasShadow = style.boxShadow !== "none";
+        style.borderWidth !== '0px' &&
+        style.borderStyle !== 'none' &&
+        style.borderColor !== 'rgba(0, 0, 0, 0)' &&
+        style.borderColor !== 'transparent';
+      const hasShadow = style.boxShadow !== 'none';
 
       if (hasBackground || hasBorder || hasShadow) {
         return {
-          type: "container",
+          type: 'container',
           styles: {
             backgroundColor: style.backgroundColor,
             border: style.border,
@@ -99,7 +99,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
         acceptNode: (node) => {
           const el = node as Element;
           const style = window.getComputedStyle(el);
-          if (style.display === "none") return NodeFilter.FILTER_REJECT;
+          if (style.display === 'none') return NodeFilter.FILTER_REJECT;
 
           // If it matches a type, accept it.
           // Note: We want to accept containers AND traverse their children.
@@ -125,18 +125,18 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
           typeData.styles?.borderRadius ||
           window.getComputedStyle(el).borderRadius;
 
-        if (typeData.type === "primitive") {
+        if (typeData.type === 'primitive') {
           // Auto-detect circle for rounded primitives
-          if (borderRadius === "0px" || !borderRadius) {
+          if (borderRadius === '0px' || !borderRadius) {
             if (
-              window.getComputedStyle(el).borderRadius === "50%" ||
+              window.getComputedStyle(el).borderRadius === '50%' ||
               (rect.width === rect.height && rect.width < 50)
             ) {
               // Keep heuristic or default
             }
-            borderRadius = "4px";
-            if (el.tagName.toLowerCase() === "button") borderRadius = "6px";
-            if (el.tagName.toLowerCase() === "img") borderRadius = "4px";
+            borderRadius = '4px';
+            if (el.tagName.toLowerCase() === 'button') borderRadius = '6px';
+            if (el.tagName.toLowerCase() === 'img') borderRadius = '4px';
           }
         }
 
@@ -163,13 +163,13 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       (containerRect.width > 0 || containerRect.height > 0)
     ) {
       newSkeletons.push({
-        key: "fallback",
-        type: "primitive",
+        key: 'fallback',
+        type: 'primitive',
         width: containerRect.width,
         height: containerRect.height,
         top: 0,
         left: 0,
-        borderRadius: (config?.borderRadius as string) || "4px",
+        borderRadius: (config?.borderRadius as string) || '4px',
       });
     }
 
@@ -212,14 +212,14 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       };
     }
     // If theme-specific colors are provided, use them
-    if (theme === "dark" && (config?.darkColor || config?.darkHighlightColor)) {
+    if (theme === 'dark' && (config?.darkColor || config?.darkHighlightColor)) {
       return {
         color: config.darkColor,
         highlightColor: config.darkHighlightColor,
       };
     }
     if (
-      theme === "light" &&
+      theme === 'light' &&
       (config?.lightColor || config?.lightHighlightColor)
     ) {
       return {
@@ -235,14 +235,14 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
 
   return (
     <div
-      style={{ position: "relative", display: "inline-block", width: "auto" }}
-      {...(theme !== "auto" ? { "data-skeleton-theme": theme } : {})}
+      style={{ position: 'relative', display: 'inline-block', width: 'auto' }}
+      {...(theme !== 'auto' ? { 'data-skeleton-theme': theme } : {})}
     >
       <div
         ref={containerRef}
         style={{
           opacity: loading ? 0 : 1,
-          transition: "opacity 0.2s ease", // Smooth transition when loading finishes
+          transition: 'opacity 0.2s ease', // Smooth transition when loading finishes
         }}
         aria-hidden={loading}
       >
@@ -252,20 +252,20 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       {loading && (
         <div
           style={{
-            position: "absolute",
+            position: 'absolute',
             top: 0,
             left: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
           }}
         >
           {skeletons.map((sk) => (
             <div
               key={sk.key}
-              style={{ position: "absolute", top: sk.top, left: sk.left }}
+              style={{ position: 'absolute', top: sk.top, left: sk.left }}
             >
-              {sk.type === "primitive" ? (
+              {sk.type === 'primitive' ? (
                 <SkeletonPrimitive
                   width={sk.width}
                   height={sk.height}
@@ -283,7 +283,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
                     ...sk.style, // Apply captured container styles
                     // Ensure it doesn't hide children if z-index issues arise,
                     // but since we render in DOM order, children come later and sit on top.
-                    boxSizing: "border-box",
+                    boxSizing: 'border-box',
                   }}
                 />
               )}

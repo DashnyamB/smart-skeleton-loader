@@ -1,7 +1,7 @@
-import React from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { HTMLMotionProps, motion } from 'framer-motion';
+import React from 'react';
 
-export interface SkeletonPrimitiveProps extends HTMLMotionProps<"div"> {
+export interface SkeletonPrimitiveProps extends HTMLMotionProps<'div'> {
   width?: string | number;
   height?: string | number;
   borderRadius?: string | number;
@@ -12,9 +12,9 @@ export interface SkeletonPrimitiveProps extends HTMLMotionProps<"div"> {
 export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
   width,
   height,
-  borderRadius = "4px",
-  color = "var(--auto-skeleton-color, #eee)",
-  highlightColor = "var(--auto-skeleton-highlight, #f5f5f5)",
+  borderRadius = '4px',
+  color = 'var(--auto-skeleton-color, #eee)',
+  highlightColor = 'var(--auto-skeleton-highlight, #f5f5f5)',
   style,
   ...props
 }) => {
@@ -33,7 +33,7 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
       transition={{
         duration: 1.5,
         repeat: Infinity,
-        ease: "easeInOut",
+        ease: 'easeInOut',
       }}
       data-testid="skeleton"
       {...props}
