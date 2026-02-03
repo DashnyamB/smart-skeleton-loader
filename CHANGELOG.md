@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/DashnyamB/smart-skeleton-loader/compare/v1.0.0...v1.0.1) (2026-02-03)
+
+
+### Bug Fixes
+
+* module resolution ([80b9243](https://github.com/DashnyamB/smart-skeleton-loader/commit/80b9243df046c01fe67ca9dfe2893526d7b51878))
+
 # 1.0.0 (2026-02-03)
 
 
