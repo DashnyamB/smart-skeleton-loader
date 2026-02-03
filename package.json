@@ -2,6 +2,17 @@
   "name": "smart-skeleton-loader",
   "version": "1.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DashnyamB/smart-skeleton-loader.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/DashnyamB/smart-skeleton-loader/issues"
+  },
+  "homepage": "https://github.com/DashnyamB/smart-skeleton-loader#readme",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
