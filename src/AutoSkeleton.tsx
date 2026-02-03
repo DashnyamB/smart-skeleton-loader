@@ -8,6 +8,12 @@ interface AutoSkeletonProps {
     color?: string;
     highlightColor?: string;
     borderRadius?: string | number;
+    theme?: "light" | "dark" | "auto";
+    // Theme-specific colors (override CSS variables)
+    lightColor?: string;
+    lightHighlightColor?: string;
+    darkColor?: string;
+    darkHighlightColor?: string;
   };
 }
 
@@ -16,6 +22,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   children,
   config,
 }) => {
+  const theme = config?.theme || "auto";
   const containerRef = useRef<HTMLDivElement>(null);
   const [skeletons, setSkeletons] = useState<
     Array<{
@@ -195,9 +202,41 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
     };
   }, [loading, children]); // Re-scan when children change
 
+  // Determine effective colors based on theme
+  const getEffectiveColors = () => {
+    // If user passed explicit color/highlightColor, use those
+    if (config?.color || config?.highlightColor) {
+      return {
+        color: config.color,
+        highlightColor: config.highlightColor,
+      };
+    }
+    // If theme-specific colors are provided, use them
+    if (theme === "dark" && (config?.darkColor || config?.darkHighlightColor)) {
+      return {
+        color: config.darkColor,
+        highlightColor: config.darkHighlightColor,
+      };
+    }
+    if (
+      theme === "light" &&
+      (config?.lightColor || config?.lightHighlightColor)
+    ) {
+      return {
+        color: config.lightColor,
+        highlightColor: config.lightHighlightColor,
+      };
+    }
+    // Otherwise, let CSS variables handle it (undefined = use CSS var defaults)
+    return { color: undefined, highlightColor: undefined };
+  };
+
+  const effectiveColors = getEffectiveColors();
+
   return (
     <div
       style={{ position: "relative", display: "inline-block", width: "auto" }}
+      {...(theme !== "auto" ? { "data-skeleton-theme": theme } : {})}
     >
       <div
         ref={containerRef}
@@ -231,8 +270,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
                   width={sk.width}
                   height={sk.height}
                   borderRadius={sk.borderRadius}
-                  color={config?.color}
-                  highlightColor={config?.highlightColor}
+                  color={effectiveColors.color}
+                  highlightColor={effectiveColors.highlightColor}
                 />
               ) : (
                 /* Container Clone: Renders static style */

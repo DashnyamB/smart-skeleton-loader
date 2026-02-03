@@ -1,0 +1,39 @@
+:root {
+  --auto-skeleton-color: #eee;
+  --auto-skeleton-highlight: #f5f5f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --auto-skeleton-color: #2a2a2a;
+    --auto-skeleton-highlight: #333;
+  }
+}
+
+[data-skeleton-theme="light"] {
+  --auto-skeleton-color: #eee;
+  --auto-skeleton-highlight: #f5f5f5;
+}
+
+[data-skeleton-theme="dark"] {
+  --auto-skeleton-color: #2a2a2a;
+  --auto-skeleton-highlight: #333;
+}
+
+/* Optional generic support if user uses .dark class on a parent */
+/* .dark [data-skeleton-theme] { } */
+
+/* To keep it simple, we let the data-skeleton-theme control itself, 
+   and the media query handles the auto case at :root level. 
+   If a user puts .dark on body, they might expect us to change.
+   We can support that by hooking into standard dark selectors if we want.
+   But typically libs just rely on CSS vars inherited. 
+   Since we define variables at :root, if the user redefines them in .dark, it works.
+   
+   Here, we forcefully set them for our defaults.
+*/
+
+:root .dark {
+  --auto-skeleton-color: #2a2a2a;
+  --auto-skeleton-highlight: #333;
+}
