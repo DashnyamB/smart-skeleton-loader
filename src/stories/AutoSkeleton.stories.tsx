@@ -528,6 +528,6 @@ export const MultiLineParagraph: Story = {
     await expect(bars).toHaveLength(lineTops.size);
 
     const widths = bars.map((b) => b.getBoundingClientRect().width);
-    await expect(widths.at(-1)!).toBeLessThan(Math.max(...widths));
+    await expect(widths[widths.length - 1]).toBeLessThan(Math.max(...widths));
   },
 };
