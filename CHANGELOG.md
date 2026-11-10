@@ -1,3 +1,12 @@
+# [2.2.0](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.1.3...v2.2.0) (2026-11-10)
+
+
+### Features
+
+* data-skeleton-ignore and data-skeleton-block overrides ([#32](https://github.com/DashnyamB/smart-skeleton-loader/issues/32)) ([3746e6e](https://github.com/DashnyamB/smart-skeleton-loader/commit/3746e6ead0d0eb9e4f966dd1e03ae62266fdef23))
+* default to delay 150ms / minDuration 400ms, skeleton immediate on mount ([#34](https://github.com/DashnyamB/smart-skeleton-loader/issues/34)) ([3c006e3](https://github.com/DashnyamB/smart-skeleton-loader/commit/3c006e318240ed88dc5476e9be33327aa5b883a5))
+* stronger default contrast, shimmer animation, CSS-free dark defaults ([#31](https://github.com/DashnyamB/smart-skeleton-loader/issues/31)) ([cf3ab44](https://github.com/DashnyamB/smart-skeleton-loader/commit/cf3ab446b81894bf0c667875eb89f987d1a1b428)), closes [#eee](https://github.com/DashnyamB/smart-skeleton-loader/issues/eee) [#f5f5f5](https://github.com/DashnyamB/smart-skeleton-loader/issues/f5f5f5) [#2a2a2a](https://github.com/DashnyamB/smart-skeleton-loader/issues/2a2a2a) [#333](https://github.com/DashnyamB/smart-skeleton-loader/issues/333) [#e0e0e0](https://github.com/DashnyamB/smart-skeleton-loader/issues/e0e0e0) [#f2f2f2](https://github.com/DashnyamB/smart-skeleton-loader/issues/f2f2f2) [#2a2a2a](https://github.com/DashnyamB/smart-skeleton-loader/issues/2a2a2a) [#3d3d3d](https://github.com/DashnyamB/smart-skeleton-loader/issues/3d3d3d)
+
 ## [2.1.3](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.1.2...v2.1.3) (2026-11-10)
 
 
