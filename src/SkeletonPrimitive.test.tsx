@@ -14,7 +14,10 @@ afterEach(() => {
 describe('SkeletonPrimitive animation', () => {
   it.each([
     ['pulse', 'auto-skeleton auto-skeleton--adaptive auto-skeleton--pulse'],
-    ['shimmer', 'auto-skeleton auto-skeleton--adaptive auto-skeleton--shimmer'],
+    [
+      'shimmer',
+      'auto-skeleton auto-skeleton--adaptive auto-skeleton--shimmer auto-skeleton--sync',
+    ],
     ['none', 'auto-skeleton auto-skeleton--adaptive'],
   ] as const)('%s → "%s"', (animation, className) => {
     render(<SkeletonPrimitive animation={animation} />);
@@ -33,6 +36,33 @@ describe('SkeletonPrimitive animation', () => {
     const el = screen.getByTestId('skeleton');
     expect(el.style.getPropertyValue('--auto-skeleton-c')).toBe(
       'var(--auto-skeleton-color, var(--auto-skeleton-default-c))',
+    );
+  });
+});
+
+describe('SkeletonPrimitive motion', () => {
+  it("shimmer: 'local' drops the page-wide sync", () => {
+    render(<SkeletonPrimitive animation="shimmer" shimmer="local" />);
+    const el = screen.getByTestId('skeleton');
+    expect(el).toHaveClass('auto-skeleton--shimmer');
+    expect(el).not.toHaveClass('auto-skeleton--sync');
+  });
+
+  it('sync only applies to shimmer', () => {
+    render(<SkeletonPrimitive animation="pulse" />);
+    expect(screen.getByTestId('skeleton')).not.toHaveClass(
+      'auto-skeleton--sync',
+    );
+  });
+
+  it('ships sync and forced-colors rules in the hoisted stylesheet', () => {
+    render(<SkeletonPrimitive />);
+    const css = document.querySelector('style')!.textContent!;
+    expect(css).toMatch(
+      /\.auto-skeleton--shimmer\.auto-skeleton--sync\s*\{\s*background-attachment: fixed/,
+    );
+    expect(css).toMatch(
+      /@media \(forced-colors: active\)[\s\S]*background-color: GrayText !important/,
     );
   });
 });

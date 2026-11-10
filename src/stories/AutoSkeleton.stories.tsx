@@ -753,6 +753,22 @@ export const AnimationStyles: Story = {
           ))}
         </div>
       ))}
+      <div
+        data-testid="shimmer-local"
+        style={{ padding: 16, borderRadius: 8, background: '#fff' }}
+      >
+        <p
+          style={{ margin: '0 0 8px', font: '12px sans-serif', color: '#888' }}
+        >
+          shimmer / local (each bar sweeps on its own)
+        </p>
+        <AutoSkeleton
+          loading
+          config={{ animation: 'shimmer', shimmer: 'local' }}
+        >
+          <AnimationCard />
+        </AutoSkeleton>
+      </div>
     </div>
   ),
   play: async ({ canvasElement }) => {
@@ -766,6 +782,14 @@ export const AnimationStyles: Story = {
     await expect(animationName('pulse-light')).toBe('auto-skeleton-pulse');
     await expect(animationName('shimmer-light')).toBe('auto-skeleton-shimmer');
     await expect(animationName('none-light')).toBe('none');
+
+    // Shimmer bars share one viewport-pinned sweep by default
+    await expect(
+      getComputedStyle(bar('shimmer-light')).backgroundAttachment,
+    ).toBe('fixed');
+    await expect(
+      getComputedStyle(bar('shimmer-local')).backgroundAttachment,
+    ).toBe('scroll');
 
     // Static bars show the base color: light and dark defaults without styles.css
     await expect(getComputedStyle(bar('none-light')).backgroundColor).toBe(

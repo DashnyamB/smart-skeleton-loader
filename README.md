@@ -257,6 +257,7 @@ import { SkeletonPrimitive } from 'smart-skeleton-loader';
 | `borderRadius`                       | `string \| number`                 | `4px`        | Fallback radius (auto-detected from your elements first).                                                     |
 | `theme`                              | `'light' \| 'dark' \| 'auto'`      | `'auto'`     | `'light'`/`'dark'` force the fixed palette for that theme. Not needed with adaptive color.                    |
 | `animation`                          | `'pulse' \| 'shimmer' \| 'none'`   | `'pulse'`    | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.                  |
+| `shimmer`                            | `'sync' \| 'local'`                | `'sync'`     | Shimmer only: all bars share one page-wide sweep, or each bar sweeps on its own.                              |
 | `classNames` / `styles`              | `Partial<Record<BarKind, …>>`      | -            | Extra class names / inline styles per kind of bar.                                                            |
 | `adaptive`                           | `'surface' \| 'inherit'`           | `'surface'`  | Adaptive ink from each surface's text color, or one tint everywhere from the wrapper's text color.            |
 | `lightColor` / `lightHighlightColor` | `string`                           | -            | Colors used when the (resolved) theme is light.                                                               |
@@ -299,7 +300,7 @@ No. By default a refetch faster than 150 ms changes nothing on screen (the curre
 <details>
 <summary><b>Is it accessible?</b></summary>
 
-While `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region. Animations are disabled under `prefers-reduced-motion`.
+While `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region. Animations are disabled under `prefers-reduced-motion`. In forced-colors mode (Windows High Contrast) bars switch to the system `GrayText` color so they stay visible.
 
 </details>
 
