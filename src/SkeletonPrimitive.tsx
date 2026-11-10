@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { BarKind } from './scan';
+
 export type SkeletonAnimation = 'pulse' | 'shimmer' | 'none';
 
 export interface SkeletonPrimitiveProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -17,6 +19,8 @@ export interface SkeletonPrimitiveProps extends React.HTMLAttributes<HTMLDivElem
   adaptive?: boolean;
   /** Text color to tint from when adaptive; defaults to the inherited `currentColor`. */
   ink?: string;
+  /** What the bar stands for; adds `auto-skeleton--{kind}` and `data-skeleton-kind`. */
+  kind?: BarKind;
 }
 
 /** Built-in defaults: used when no --auto-skeleton-* variable or color prop is set. */
@@ -71,6 +75,7 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
   animation = 'pulse',
   adaptive = true,
   ink,
+  kind,
   className,
   style,
   ...props
@@ -78,6 +83,7 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
   const classes = ['auto-skeleton'];
   if (adaptive) classes.push('auto-skeleton--adaptive');
   if (animation !== 'none') classes.push(`auto-skeleton--${animation}`);
+  if (kind) classes.push(`auto-skeleton--${kind}`);
   if (className) classes.push(className);
 
   return (
@@ -101,6 +107,7 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
           } as React.CSSProperties
         }
         data-testid="skeleton"
+        data-skeleton-kind={kind}
         {...props}
       />
     </>

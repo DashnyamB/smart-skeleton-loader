@@ -1051,3 +1051,58 @@ export const InheritVsSurface: Story = {
     await expect(lightness(bar('inherit'))).toBeLessThan(0.5);
   },
 };
+
+// Style each kind of bar: plain CSS classes (or Tailwind) through config.classNames
+const KIND_CSS = `
+.demo-avatar { outline: 2px solid color-mix(in srgb, currentColor 25%, transparent); outline-offset: 2px; }
+.demo-heading { --auto-skeleton-heading-radius: 999px; }
+.demo-media { opacity: 0.6; }
+`;
+
+export const CustomizeByType: Story = {
+  args: { loading: true, children: null },
+  render: (args) => (
+    <SideBySide args={args}>
+      <div style={{ width: 300, font: '14px sans-serif' }}>
+        <ProfileRow />
+        <h3 style={{ margin: '12px 0 8px' }}>Weekend in the Alps</h3>
+        <img
+          src={IMG_PLACEHOLDER}
+          alt=""
+          style={{ width: '100%', height: 140, display: 'block' }}
+        />
+      </div>
+    </SideBySide>
+  ),
+  argTypes: { loading: { control: false } },
+  decorators: [
+    (Story) => (
+      <SkeletonProvider
+        config={{
+          classNames: {
+            avatar: 'demo-avatar',
+            heading: 'demo-heading',
+            media: 'demo-media',
+          },
+        }}
+      >
+        <style>{KIND_CSS}</style>
+        <Story />
+      </SkeletonProvider>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const bars = within(canvasElement).getAllByTestId('skeleton');
+    const ofKind = (kind: string) =>
+      bars.find((b) => b.dataset.skeletonKind === kind)!;
+
+    await expect(ofKind('avatar')).toHaveClass('demo-avatar');
+    await expect(getComputedStyle(ofKind('avatar')).outlineStyle).toBe('solid');
+    await expect(ofKind('heading')).toHaveClass('demo-heading');
+    await expect(getComputedStyle(ofKind('heading')).borderTopLeftRadius).toBe(
+      '999px',
+    );
+    await expect(getComputedStyle(ofKind('media')).opacity).toBe('0.6');
+    await expect(ofKind('text')).toBeDefined();
+  },
+};
