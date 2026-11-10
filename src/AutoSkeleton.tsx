@@ -31,7 +31,11 @@ export interface AutoSkeletonProps {
   /** Once shown, keep the skeleton at least this long (ms). Default 400. */
   minDuration?: number;
   config?: {
-    color?: string;
+    /**
+     * `'adaptive'` (default) tints bars from the surrounding text color so they
+     * match any theme; `'static'` uses fixed light/dark greys; any CSS color sets it.
+     */
+    color?: 'adaptive' | 'static' | (string & {});
     highlightColor?: string;
     borderRadius?: string | number;
     theme?: 'light' | 'dark' | 'auto';
@@ -68,6 +72,11 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   config,
 }) => {
   const theme = config?.theme || 'auto';
+  const colorMode = config?.color;
+  // Adaptive unless a fixed palette was asked for (static mode or an explicit theme)
+  const adaptive = colorMode !== 'static' && theme === 'auto';
+  const explicitColor =
+    colorMode === 'adaptive' || colorMode === 'static' ? undefined : colorMode;
   const prefersDark = usePrefersDark();
   // 'auto' follows the OS color scheme so light*/dark* colors apply there too
   const resolvedTheme =
@@ -124,6 +133,15 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
         scan();
       });
     };
+    // A theme switch mid-load (class/style on <html>, <body> or any wrapper
+    // above us) changes the ink. Watch only the ancestor chain, not subtrees.
+    const themeObserver = new MutationObserver(schedule);
+    for (let el = container.parentElement; el; el = el.parentElement) {
+      themeObserver.observe(el, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme', 'data-mode'],
+      });
+    }
     const resizeObserver = new ResizeObserver(schedule);
     resizeObserver.observe(container);
     const mutationObserver = new MutationObserver(schedule);
@@ -136,18 +154,21 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
 
     return () => {
       cancelAnimationFrame(frame);
+      themeObserver.disconnect();
       resizeObserver.disconnect();
       mutationObserver.disconnect();
     };
-  }, [showSkeleton, borderRadius]);
+    // prefersDark: an OS theme flip changes the inherited text color, so re-measure the ink
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies
+  }, [showSkeleton, borderRadius, prefersDark]);
 
   // Determine effective colors based on theme
   const getEffectiveColors = () => {
     // If user passed explicit color/highlightColor, use those
-    if (config?.color || config?.highlightColor) {
+    if (explicitColor || config?.highlightColor) {
       return {
-        color: config.color,
-        highlightColor: config.highlightColor,
+        color: explicitColor,
+        highlightColor: config?.highlightColor,
       };
     }
     // If theme-specific colors are provided, use them
@@ -220,6 +241,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
             <SkeletonPrimitive
               width="100%"
               height="100%"
+              adaptive={adaptive}
               color={effectiveColors.color}
               highlightColor={effectiveColors.highlightColor}
               animation={config?.animation}
@@ -235,6 +257,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
                   width={sk.width}
                   height={sk.height}
                   borderRadius={sk.borderRadius}
+                  adaptive={adaptive}
+                  ink={sk.ink}
                   color={effectiveColors.color}
                   highlightColor={effectiveColors.highlightColor}
                   animation={config?.animation}
