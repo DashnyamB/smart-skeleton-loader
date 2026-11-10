@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.1.2...v2.1.3) (2026-11-10)
+
+
+### Performance Improvements
+
+* scan once per frame, only while loading, one style read per element ([#30](https://github.com/DashnyamB/smart-skeleton-loader/issues/30)) ([9c97e76](https://github.com/DashnyamB/smart-skeleton-loader/commit/9c97e76a6b5ce227d736d34ede63a7b48211a164))
+
 ## [2.1.2](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.1.1...v2.1.2) (2026-11-10)
 
 
