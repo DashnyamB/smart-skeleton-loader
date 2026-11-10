@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.0.0...v2.1.0) (2026-11-10)
+
+
+### Features
+
+* add delay and minDuration with a skeleton/content crossfade ([#24](https://github.com/DashnyamB/smart-skeleton-loader/issues/24)) ([70a76c1](https://github.com/DashnyamB/smart-skeleton-loader/commit/70a76c143256873ec0be7bd110b4938151df7b28))
+
 # [2.0.0](https://github.com/DashnyamB/smart-skeleton-loader/compare/v1.0.1...v2.0.0) (2026-11-10)
 
 
