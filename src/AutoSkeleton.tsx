@@ -5,6 +5,8 @@ import { SkeletonPrimitive } from './SkeletonPrimitive';
 export interface AutoSkeletonProps {
   loading: boolean;
   children: ReactNode;
+  /** Text announced to screen readers while loading. */
+  loadingLabel?: string;
   config?: {
     color?: string;
     highlightColor?: string;
@@ -18,9 +20,22 @@ export interface AutoSkeletonProps {
   };
 }
 
+const VISUALLY_HIDDEN: React.CSSProperties = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+};
+
 export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   loading,
   children,
+  loadingLabel = 'Loading…',
   config,
 }) => {
   const theme = config?.theme || 'auto';
@@ -238,7 +253,13 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
     <div
       style={{ position: 'relative', display: 'inline-block', width: 'auto' }}
       {...(theme !== 'auto' ? { 'data-skeleton-theme': theme } : {})}
+      aria-busy={loading}
     >
+      {/* <output> is not reliably announced as a live region; role="status" is. */}
+      {/* oxlint-disable-next-line jsx-a11y/prefer-tag-over-role */}
+      <span role="status" style={VISUALLY_HIDDEN}>
+        {loading ? loadingLabel : ''}
+      </span>
       <div
         ref={containerRef}
         style={{
@@ -246,6 +267,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
           transition: 'opacity 0.2s ease', // Smooth transition when loading finishes
         }}
         aria-hidden={loading}
+        inert={loading}
       >
         {children}
       </div>

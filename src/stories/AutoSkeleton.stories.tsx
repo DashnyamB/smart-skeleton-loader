@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
+import { expect, userEvent, within } from 'storybook/test';
 
 import { AutoSkeleton } from '../AutoSkeleton';
 
@@ -378,4 +379,65 @@ const DataFetchingDemo = () => {
 export const DataFetchingList: Story = {
   args: { loading: true, children: null },
   render: () => <DataFetchingDemo />,
+};
+
+// Accessibility: hidden content must not be reachable while loading
+const AccessibilityDemo = ({ loading }: { loading: boolean }) => {
+  const [clicks, setClicks] = useState(0);
+  return (
+    <div style={{ fontFamily: 'sans-serif' }}>
+      <p data-testid="click-count">Clicks: {clicks}</p>
+      <AutoSkeleton loading={loading} loadingLabel="Loading profile form">
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            padding: 16,
+            border: '1px solid #ddd',
+            borderRadius: 8,
+            width: 260,
+          }}
+        >
+          <label htmlFor="a11y-name">Name</label>
+          <input id="a11y-name" placeholder="Jane Doe" />
+          <button type="button" onClick={() => setClicks((c) => c + 1)}>
+            Save
+          </button>
+        </div>
+      </AutoSkeleton>
+    </div>
+  );
+};
+
+export const Accessibility: Story = {
+  args: { loading: true, children: null },
+  render: (args) => <AccessibilityDemo loading={args.loading} />,
+  play: async ({ canvasElement, args }) => {
+    if (!args.loading) return;
+    const canvas = within(canvasElement);
+
+    // Announced to screen readers
+    await expect(canvas.getByRole('status')).toHaveTextContent(
+      'Loading profile form',
+    );
+
+    // Keyboard focus skips the hidden input and button
+    await userEvent.tab();
+    await expect(canvasElement.ownerDocument.activeElement).not.toBe(
+      canvasElement.querySelector('#a11y-name'),
+    );
+
+    // Clicking where the hidden button sits does nothing
+    const button = canvasElement.querySelector('button')!;
+    const { x, y, width, height } = button.getBoundingClientRect();
+    const hit = canvasElement.ownerDocument.elementFromPoint(
+      x + width / 2,
+      y + height / 2,
+    ) as HTMLElement | null;
+    hit?.click();
+    await expect(canvas.getByTestId('click-count')).toHaveTextContent(
+      'Clicks: 0',
+    );
+  },
 };
