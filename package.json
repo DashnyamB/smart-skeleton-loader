@@ -13,18 +13,26 @@
     "url": "https://github.com/DashnyamB/smart-skeleton-loader/issues"
   },
   "homepage": "https://github.com/DashnyamB/smart-skeleton-loader#readme",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "style": "./dist/styles.css",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.cjs",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./styles.css": "./dist/styles.css"
   },
+  "sideEffects": [
+    "*.css"
+  ],
   "files": [
     "dist"
   ],
@@ -43,20 +51,14 @@
   "author": "dashnyamb",
   "license": "MIT",
   "description": "",
-  "dependencies": {
-    "clsx": "^2.1.1",
-    "motion": "^14.11.1",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "tailwind-merge": "^3.7.0"
+  "peerDependencies": {
+    "react": "^19.0.0"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^5.6.0",
     "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/git": "^11.0.1",
     "@storybook/addon-a11y": "^10.6.6",
     "@storybook/addon-docs": "^10.6.6",
-    "@storybook/addon-onboarding": "^10.6.6",
     "@storybook/addon-vitest": "^10.6.6",
     "@storybook/react-vite": "^10.6.6",
     "@testing-library/dom": "^10.4.2",
@@ -66,16 +68,14 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitest/browser-playwright": "^5.1.0",
-    "@vitest/coverage-v8": "^5.1.0",
-    "autoprefixer": "^10.6.2",
     "jsdom": "^31.0.0",
     "oxfmt": "^0.78.0",
     "oxlint": "^1.93.0",
     "playwright": "^1.65.0",
-    "postcss": "^8.5.32",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "semantic-release": "^25.0.9",
     "storybook": "^10.6.6",
-    "tailwindcss": "^4.3.5",
     "tsup": "^9.0.0",
     "typescript": "^6.0.3",
     "vitest": "^5.1.0"

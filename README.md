@@ -1,9 +1,9 @@
-# react-auto-skeleton
+# smart-skeleton-loader
 
 > **The smartest skeleton loader for React.**
 > Automatically generate perfectly matching skeletons by measuring your actual components.
 
-[![npm version](https://img.shields.io/npm/v/react-auto-skeleton.svg)](https://www.npmjs.com/package/react-auto-skeleton)
+[![npm version](https://img.shields.io/npm/v/smart-skeleton-loader.svg)](https://www.npmjs.com/package/smart-skeleton-loader)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-orange.svg?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/dashnyamkkq)
 
@@ -13,10 +13,10 @@
 
 </div>
 
-`react-auto-skeleton` eliminates the need to manually create and maintain skeleton versions of your components. It renders your actual component responsibly (hidden), measures its layout, and overlays precise skeletons for text, images, and containers.
+`smart-skeleton-loader` eliminates the need to manually create and maintain skeleton versions of your components. It renders your actual component responsibly (hidden), measures its layout, and overlays precise skeletons for text, images, and containers.
 
 > [!IMPORTANT]
-> **Enjoying this project?** If you find `react-auto-skeleton` useful, please consider [buying me a coffee](https://buymeacoffee.com/dashnyamkkq) to support further development! 💖
+> **Enjoying this project?** If you find `smart-skeleton-loader` useful, please consider [buying me a coffee](https://buymeacoffee.com/dashnyamkkq) to support further development! 💖
 
 ## ✨ Features
 
@@ -32,12 +32,12 @@
 ## 📦 Installation
 
 ```bash
-npm install react-auto-skeleton motion
+npm install smart-skeleton-loader
 # or
-yarn add react-auto-skeleton motion
+yarn add smart-skeleton-loader
 ```
 
-_Note: `motion` is a peer dependency used for the smooth pulse animations._
+_Zero runtime dependencies — only `react` (19+) as a peer._
 
 ## 🚀 Usage
 
@@ -46,7 +46,7 @@ _Note: `motion` is a peer dependency used for the smooth pulse animations._
 Wrap your component in `AutoSkeleton` and control the `loading` state.
 
 ```tsx
-import { AutoSkeleton } from 'react-auto-skeleton';
+import { AutoSkeleton } from 'smart-skeleton-loader';
 
 const UserProfile = ({ loading, user }) => {
   return (
@@ -67,7 +67,7 @@ const UserProfile = ({ loading, user }) => {
 
 When fetching lists, you might start with an empty array. **How can we measure an empty array?**
 
-The solution is the **Template Pattern**: Render "dummy" items while loading. `react-auto-skeleton` will measure these dummies and create the skeleton layout.
+The solution is the **Template Pattern**: Render "dummy" items while loading. `smart-skeleton-loader` will measure these dummies and create the skeleton layout.
 
 ```tsx
 const UserList = () => {
@@ -95,7 +95,7 @@ const UserList = () => {
 
 ### 3. Container Detection (Cards)
 
-`react-auto-skeleton` intelligently distinguishes between **Content** and **Containers**.
+`smart-skeleton-loader` intelligently distinguishes between **Content** and **Containers**.
 
 - **Content** (Text, Images, Buttons) -> Renders as a **Pulsing Gray Box**.
 - **Containers** (Elements with visible `border`, `background-color`, or `box-shadow`) -> Renders as a **Static Clone** (with your exact styles) and **NO** pulse.
