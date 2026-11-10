@@ -7,6 +7,10 @@ export interface AutoSkeletonProps {
   children: ReactNode;
   /** Text announced to screen readers while loading. */
   loadingLabel?: string;
+  /** Class name for the outer wrapper. */
+  className?: string;
+  /** Style for the outer wrapper; merged over the defaults (`position: relative; display: block`). */
+  style?: React.CSSProperties;
   config?: {
     color?: string;
     highlightColor?: string;
@@ -36,6 +40,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   loading,
   children,
   loadingLabel = 'Loading…',
+  className,
+  style,
   config,
 }) => {
   const theme = config?.theme || 'auto';
@@ -251,7 +257,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
 
   return (
     <div
-      style={{ position: 'relative', display: 'inline-block', width: 'auto' }}
+      className={className}
+      style={{ position: 'relative', display: 'block', ...style }}
       {...(theme !== 'auto' ? { 'data-skeleton-theme': theme } : {})}
       aria-busy={loading}
     >
