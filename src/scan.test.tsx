@@ -43,7 +43,7 @@ describe('scanSkeletons', () => {
 
     scan.scanSkeletons(host);
 
-    expect(spy).toHaveBeenCalledTimes(51); // 1 <ul> + 50 <li>
+    expect(spy).toHaveBeenCalledTimes(52); // host (ink) + 1 <ul> + 50 <li>
     host.remove();
   });
 
@@ -105,7 +105,7 @@ describe('AutoSkeleton scanning cost', () => {
           </AutoSkeleton>,
         );
       }
-      expect(created).toBe(1);
+      expect(created).toBe(2); // content + theme observer, created once
     } finally {
       window.MutationObserver = Original;
     }
@@ -132,8 +132,8 @@ describe('AutoSkeleton scanning cost', () => {
     expect(frames).toHaveLength(1);
 
     act(() => frames.shift()!(0));
-    // One scan: <ul> + 3 rows + 10 new rows
-    expect(spy).toHaveBeenCalledTimes(14);
+    // One scan: content (ink) + <ul> + 3 rows + 10 new rows
+    expect(spy).toHaveBeenCalledTimes(15);
   });
 });
 
@@ -170,5 +170,70 @@ describe('per-element overrides', () => {
   it('data-skeleton-block defaults to a 4px radius', () => {
     const [block] = scanHtml('<div data-skeleton-block></div>');
     expect(block.borderRadius).toBe('4px');
+  });
+});
+
+describe('adaptive ink', () => {
+  const scanHtml = (html: string, hostStyle = 'color: rgb(20, 20, 20)') => {
+    const host = document.createElement('div');
+    host.setAttribute('style', hostStyle);
+    host.innerHTML = html;
+    document.body.append(host);
+    const boxes = scan.scanSkeletons(host);
+    host.remove();
+    return boxes;
+  };
+
+  it('tints bars on the outer surface from the content text color', () => {
+    const boxes = scanHtml('<button></button><img alt="" />');
+    expect(boxes.map((b) => b.ink)).toEqual([
+      'rgb(20, 20, 20)',
+      'rgb(20, 20, 20)',
+    ]);
+  });
+
+  it('an opaque background starts a new surface for its subtree', () => {
+    const [panel, inner] = scanHtml(`
+      <div style="background-color: rgb(10, 10, 10); color: rgb(240, 240, 240)">
+        <button></button>
+      </div>
+    `);
+    // The panel itself sits on the outer surface; what is inside it uses its ink
+    expect(panel.ink).toBe('rgb(20, 20, 20)');
+    expect(inner.ink).toBe('rgb(240, 240, 240)');
+  });
+
+  it('translucent backgrounds keep the outer ink', () => {
+    const boxes = scanHtml(`
+      <div style="background-color: rgba(0, 0, 0, 0.5); color: rgb(240, 240, 240)">
+        <button></button>
+      </div>
+    `);
+    expect(boxes[boxes.length - 1].ink).toBe('rgb(20, 20, 20)');
+  });
+
+  it('siblings with their own text colors share the surface ink', () => {
+    const boxes = scanHtml(`
+      <button style="color: rgb(0, 0, 255)"></button>
+      <button style="color: rgb(255, 0, 0)"></button>
+    `);
+    expect(new Set(boxes.map((b) => b.ink))).toEqual(
+      new Set(['rgb(20, 20, 20)']),
+    );
+  });
+});
+
+describe('isOpaque', () => {
+  it.each([
+    ['rgb(1, 2, 3)', true],
+    ['rgba(1, 2, 3, 1)', true],
+    ['rgba(1, 2, 3, 0.4)', false],
+    ['rgba(0, 0, 0, 0)', false],
+    ['transparent', false],
+    ['rgb(1 2 3 / 50%)', false],
+    ['oklch(0.5 0.1 200)', true],
+    ['color(srgb 1 0 0 / 0.2)', false],
+  ])('%s → %s', (color, expected) => {
+    expect(scan.isOpaque(color)).toBe(expected);
   });
 });

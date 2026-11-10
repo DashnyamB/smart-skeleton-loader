@@ -50,7 +50,8 @@ Hand-written skeletons are a second copy of your UI. Every time a card gets a ne
 - 🧘 **Zero layout shift.** The real content holds its space the whole time, then crossfades in. Your CLS score will thank you.
 - ⏱️ **No flicker, ever.** Fast refetches never flash a skeleton (`delay`), and a skeleton that does appear never blinks away (`minDuration`).
 - ♿ **Accessible by default.** Hidden content is `inert`, the wrapper is `aria-busy`, and loading is announced to screen readers.
-- 🌗 **Light, dark and auto themes.** Follows the OS color scheme live, or force a theme. Pulse, shimmer or static animation, and `prefers-reduced-motion` is respected.
+- 🎨 **Matches your theme automatically.** Bars are tinted from the text color of the surface they sit on, so light pages, dark sidebars, brand-colored cards and custom themes all look right with zero config, and a theme switch mid-load re-tints them.
+- 🌗 **Pulse, shimmer or static.** `prefers-reduced-motion` is respected; fixed light/dark palettes are available too.
 - ⚡ **Next.js & SSR friendly.** Ships with `'use client'`, works from Server Components, and shows a placeholder before hydration.
 - 🪶 **Tiny and dependency-free.** ~4.5 kB gzipped, nothing but `react` as a peer. No CSS import required.
 
@@ -145,6 +146,16 @@ So a card still looks like a card while its content pulses inside it.
 
 ### Theming
 
+**Adaptive color (default).** With no color configured, each bar is the text color of the surface it sits on at 12% opacity. A dark sidebar inside a light page gets light bars; a blue card gets bluish bars. Everything on one surface gets the same tint, so skeletons stay consistent across the app. Tune the strength with a CSS variable:
+
+```css
+:root {
+  --auto-skeleton-strength: 16%; /* default 12% */
+}
+```
+
+**Fixed colors.** Explicit colors always win over adaptive ones:
+
 ```tsx
 <AutoSkeleton
   loading={isLoading}
@@ -160,7 +171,57 @@ So a card still looks like a card while its content pulses inside it.
 </AutoSkeleton>
 ```
 
-Prefer CSS? Set `--auto-skeleton-color` and `--auto-skeleton-highlight` globally, or import the optional `smart-skeleton-loader/styles.css` (supports a `.dark` class).
+Prefer CSS? Set `--auto-skeleton-color` and `--auto-skeleton-highlight` globally, or import the optional `smart-skeleton-loader/styles.css` (supports a `.dark` class). Either one replaces adaptive color.
+
+Color precedence: `color` props › `--auto-skeleton-color` CSS variable › adaptive. `config.color: 'static'` or an explicit `theme: 'light' | 'dark'` uses the fixed greys instead.
+
+### Styling each kind of bar
+
+Every bar knows what it stands for: `text`, `heading`, `avatar`, `media`, `button`, `input`, `block` or `container`. Target them with classes (Tailwind works), inline styles, or plain CSS:
+
+```tsx
+<AutoSkeleton
+  loading={isLoading}
+  config={{
+    classNames: { avatar: 'ring-2 ring-offset-2', heading: 'w-1/2' },
+    styles: { media: { opacity: 0.6 } },
+  }}
+>
+  <PostCard />
+</AutoSkeleton>
+```
+
+```css
+/* Each bar has .auto-skeleton--{kind} and [data-skeleton-kind] */
+.auto-skeleton--media {
+  opacity: 0.6;
+}
+/* Per-kind radius tokens */
+:root {
+  --auto-skeleton-heading-radius: 999px;
+  --auto-skeleton-avatar-radius: 50%;
+}
+```
+
+Detection is automatic (headings by tag or a font size at least 1.25× the surrounding text, avatars as round, square images). Override it on any element with `data-skeleton-type="avatar"`; a non-text type draws the element as one bar, like `data-skeleton-block`.
+
+### App-wide defaults
+
+Wrap your app once instead of repeating `config` everywhere. Props on an individual `<AutoSkeleton>` still win, key by key, and nested providers merge over outer ones.
+
+```tsx
+import { SkeletonProvider } from 'smart-skeleton-loader';
+
+<SkeletonProvider
+  config={{ animation: 'shimmer', borderRadius: 8 }}
+  delay={200}
+  loadingLabel="Loading content"
+>
+  <App />
+</SkeletonProvider>;
+```
+
+Want every skeleton in the app to share exactly one tint, whatever surface it is on? Use `config={{ adaptive: 'inherit' }}`. The default, `'surface'`, tints each surface from its own text color.
 
 ### Hand-placed skeletons
 
@@ -189,22 +250,26 @@ import { SkeletonPrimitive } from 'smart-skeleton-loader';
 
 ### `config`
 
-| Key                                  | Type                             | Default   | Description                                                                                       |
-| ------------------------------------ | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
-| `color`                              | `string`                         | `#e0e0e0` | Background color of primitives.                                                                   |
-| `highlightColor`                     | `string`                         | `#f2f2f2` | Animation highlight color.                                                                        |
-| `borderRadius`                       | `string \| number`               | `4px`     | Fallback radius (auto-detected from your elements first).                                         |
-| `theme`                              | `'light' \| 'dark' \| 'auto'`    | `'auto'`  | Force a theme, or follow the OS color scheme.                                                     |
-| `animation`                          | `'pulse' \| 'shimmer' \| 'none'` | `'pulse'` | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.      |
-| `lightColor` / `lightHighlightColor` | `string`                         | -         | Colors used when the (resolved) theme is light.                                                   |
-| `darkColor` / `darkHighlightColor`   | `string`                         | -         | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme. |
+| Key                                  | Type                               | Default      | Description                                                                                                   |
+| ------------------------------------ | ---------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------- |
+| `color`                              | `'adaptive' \| 'static' \| string` | `'adaptive'` | `'adaptive'` tints from the surrounding text color, `'static'` uses fixed light/dark greys, or any CSS color. |
+| `highlightColor`                     | `string`                           | `#f2f2f2`    | Animation highlight color.                                                                                    |
+| `borderRadius`                       | `string \| number`                 | `4px`        | Fallback radius (auto-detected from your elements first).                                                     |
+| `theme`                              | `'light' \| 'dark' \| 'auto'`      | `'auto'`     | `'light'`/`'dark'` force the fixed palette for that theme. Not needed with adaptive color.                    |
+| `animation`                          | `'pulse' \| 'shimmer' \| 'none'`   | `'pulse'`    | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.                  |
+| `shimmer`                            | `'sync' \| 'local'`                | `'sync'`     | Shimmer only: all bars share one page-wide sweep, or each bar sweeps on its own.                              |
+| `classNames` / `styles`              | `Partial<Record<BarKind, …>>`      | -            | Extra class names / inline styles per kind of bar.                                                            |
+| `adaptive`                           | `'surface' \| 'inherit'`           | `'surface'`  | Adaptive ink from each surface's text color, or one tint everywhere from the wrapper's text color.            |
+| `lightColor` / `lightHighlightColor` | `string`                           | -            | Colors used when the (resolved) theme is light.                                                               |
+| `darkColor` / `darkHighlightColor`   | `string`                           | -            | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme.             |
 
 ### Per-element attributes
 
-| Attribute              | Effect                                                                                    |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `data-skeleton-ignore` | No skeleton for this element or anything inside it (e.g. decorative badges).              |
-| `data-skeleton-block`  | Draw the element as one block and skip its children (e.g. charts, maps, complex widgets). |
+| Attribute              | Effect                                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `data-skeleton-ignore` | No skeleton for this element or anything inside it (e.g. decorative badges).                                                   |
+| `data-skeleton-block`  | Draw the element as one block and skip its children (e.g. charts, maps, complex widgets).                                      |
+| `data-skeleton-type`   | Set the bar kind (`text`, `heading`, `avatar`, `media`, `button`, `input`, `block`, `container`). Non-text kinds draw one bar. |
 
 ## 🛠 How it works
 
@@ -235,14 +300,21 @@ No. By default a refetch faster than 150 ms changes nothing on screen (the curre
 <details>
 <summary><b>Is it accessible?</b></summary>
 
-While `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region. Animations are disabled under `prefers-reduced-motion`.
+While `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region. Animations are disabled under `prefers-reduced-motion`. In forced-colors mode (Windows High Contrast) bars switch to the system `GrayText` color so they stay visible.
 
 </details>
 
 <details>
 <summary><b>Do I need to import a stylesheet?</b></summary>
 
-No. Default colors (light `#e0e0e0` / `#f2f2f2`, dark `#2a2a2a` / `#3d3d3d`) are built in. `styles.css` is optional, for global theming via CSS variables.
+No. Skeletons tint themselves from your UI (adaptive color), and fixed greys (light `#e0e0e0` / `#f2f2f2`, dark `#2a2a2a` / `#3d3d3d`) are built in for `color: 'static'`. `styles.css` is optional, for global theming via CSS variables.
+
+</details>
+
+<details>
+<summary><b>My skeletons changed color after upgrading.</b></summary>
+
+Since 2.3, skeletons use adaptive color by default instead of a fixed grey. To restore the old look, pass `config={{ color: 'static' }}`, or set `--auto-skeleton-color` / import `styles.css`. Adaptive color uses CSS `color-mix()` (Chrome 111+, Safari 16.2+, Firefox 113+).
 
 </details>
 

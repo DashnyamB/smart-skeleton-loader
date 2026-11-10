@@ -6,8 +6,14 @@ import React, {
   useState,
 } from 'react';
 
-import { sameBoxes, scanSkeletons, type SkeletonBox } from './scan';
+import {
+  sameBoxes,
+  scanSkeletons,
+  type BarKind,
+  type SkeletonBox,
+} from './scan';
 import { SkeletonPrimitive, type SkeletonAnimation } from './SkeletonPrimitive';
+import { useSkeletonConfig } from './SkeletonProvider';
 import { useDisplayedLoading } from './useDisplayedLoading';
 import { usePrefersDark } from './usePrefersDark';
 
@@ -31,12 +37,28 @@ export interface AutoSkeletonProps {
   /** Once shown, keep the skeleton at least this long (ms). Default 400. */
   minDuration?: number;
   config?: {
-    color?: string;
+    /**
+     * `'adaptive'` (default) tints bars from the surrounding text color so they
+     * match any theme; `'static'` uses fixed light/dark greys; any CSS color sets it.
+     */
+    color?: 'adaptive' | 'static' | (string & {});
+    /**
+     * Where adaptive ink comes from. `'surface'` (default): each surface's own
+     * text color. `'inherit'`: the wrapper's text color everywhere, so every
+     * skeleton in the app gets the same tint.
+     */
+    adaptive?: 'surface' | 'inherit';
     highlightColor?: string;
     borderRadius?: string | number;
     theme?: 'light' | 'dark' | 'auto';
     /** `pulse` (default), `shimmer`, or `none`. */
     animation?: SkeletonAnimation;
+    /** Shimmer only: `'sync'` (default) shares one sweep across all bars, `'local'` sweeps each bar. */
+    shimmer?: 'sync' | 'local';
+    /** Extra class names per kind of bar, e.g. `{ avatar: 'ring-2', heading: 'w-1/2' }`. */
+    classNames?: Partial<Record<BarKind, string>>;
+    /** Extra inline styles per kind of bar; merged over the measured size and position. */
+    styles?: Partial<Record<BarKind, React.CSSProperties>>;
     // Theme-specific colors (override CSS variables)
     lightColor?: string;
     lightHighlightColor?: string;
@@ -60,14 +82,27 @@ const VISUALLY_HIDDEN: React.CSSProperties = {
 export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   loading,
   children,
-  loadingLabel = 'Loading…',
+  loadingLabel: labelProp,
   className,
   style,
-  delay = 150,
-  minDuration = 400,
-  config,
+  delay: delayProp,
+  minDuration: minDurationProp,
+  config: configProp,
 }) => {
+  // Instance props win over <SkeletonProvider> defaults
+  const defaults = useSkeletonConfig();
+  const config = defaults.config
+    ? { ...defaults.config, ...configProp }
+    : configProp;
+  const loadingLabel = labelProp ?? defaults.loadingLabel ?? 'Loading…';
+  const delay = delayProp ?? defaults.delay ?? 150;
+  const minDuration = minDurationProp ?? defaults.minDuration ?? 400;
   const theme = config?.theme || 'auto';
+  const colorMode = config?.color;
+  // Adaptive unless a fixed palette was asked for (static mode or an explicit theme)
+  const adaptive = colorMode !== 'static' && theme === 'auto';
+  const explicitColor =
+    colorMode === 'adaptive' || colorMode === 'static' ? undefined : colorMode;
   const prefersDark = usePrefersDark();
   // 'auto' follows the OS color scheme so light*/dark* colors apply there too
   const resolvedTheme =
@@ -124,6 +159,15 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
         scan();
       });
     };
+    // A theme switch mid-load (class/style on <html>, <body> or any wrapper
+    // above us) changes the ink. Watch only the ancestor chain, not subtrees.
+    const themeObserver = new MutationObserver(schedule);
+    for (let el = container.parentElement; el; el = el.parentElement) {
+      themeObserver.observe(el, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme', 'data-mode'],
+      });
+    }
     const resizeObserver = new ResizeObserver(schedule);
     resizeObserver.observe(container);
     const mutationObserver = new MutationObserver(schedule);
@@ -136,18 +180,21 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
 
     return () => {
       cancelAnimationFrame(frame);
+      themeObserver.disconnect();
       resizeObserver.disconnect();
       mutationObserver.disconnect();
     };
-  }, [showSkeleton, borderRadius]);
+    // prefersDark: an OS theme flip changes the inherited text color, so re-measure the ink
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies
+  }, [showSkeleton, borderRadius, prefersDark]);
 
   // Determine effective colors based on theme
   const getEffectiveColors = () => {
     // If user passed explicit color/highlightColor, use those
-    if (config?.color || config?.highlightColor) {
+    if (explicitColor || config?.highlightColor) {
       return {
-        color: config.color,
-        highlightColor: config.highlightColor,
+        color: explicitColor,
+        highlightColor: config?.highlightColor,
       };
     }
     // If theme-specific colors are provided, use them
@@ -220,9 +267,11 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
             <SkeletonPrimitive
               width="100%"
               height="100%"
+              adaptive={adaptive}
               color={effectiveColors.color}
               highlightColor={effectiveColors.highlightColor}
               animation={config?.animation}
+              shimmer={config?.shimmer}
             />
           )}
           {skeletons.map((sk) => (
@@ -232,16 +281,25 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
             >
               {sk.type === 'primitive' ? (
                 <SkeletonPrimitive
+                  kind={sk.kind}
+                  className={config?.classNames?.[sk.kind]}
+                  style={config?.styles?.[sk.kind]}
                   width={sk.width}
                   height={sk.height}
-                  borderRadius={sk.borderRadius}
+                  // Per-kind radius token, e.g. --auto-skeleton-avatar-radius
+                  borderRadius={`var(--auto-skeleton-${sk.kind}-radius, ${sk.borderRadius})`}
+                  adaptive={adaptive}
+                  ink={config?.adaptive === 'inherit' ? undefined : sk.ink}
                   color={effectiveColors.color}
                   highlightColor={effectiveColors.highlightColor}
                   animation={config?.animation}
+                  shimmer={config?.shimmer}
                 />
               ) : (
                 /* Container Clone: Renders static style */
                 <div
+                  className={config?.classNames?.container}
+                  data-skeleton-kind="container"
                   style={{
                     width: sk.width,
                     height: sk.height,
@@ -250,6 +308,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
                     // Ensure it doesn't hide children if z-index issues arise,
                     // but since we render in DOM order, children come later and sit on top.
                     boxSizing: 'border-box',
+                    ...config?.styles?.container,
                   }}
                 />
               )}
