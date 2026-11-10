@@ -1,0 +1,29 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction" />
+
+# smart-skeleton-loader
+
+Wrap any component in `<AutoSkeleton>` and it measures the real layout to draw a matching skeleton. You don't hand-build any placeholders.
+
+```tsx
+import { AutoSkeleton } from 'smart-skeleton-loader';
+
+<AutoSkeleton loading={!user}>
+  <UserCard user={user ?? placeholderUser} />
+</AutoSkeleton>;
+```
+
+Render the same component with placeholder data while loading (the **template pattern**, see _Behavior › Data Fetching_). The skeleton then has the exact shape of the real content.
+
+## Where to look
+
+| Section                                 | What it shows                                                                             |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **AutoSkeleton › Playground**           | Every option with live controls.                                                          |
+| **Content detection**                   | Text lines, cards, forms, bar kinds, and the `data-skeleton-*` overrides.                 |
+| **Styling**                             | Adaptive color (default), fixed colors, animations, per-kind styling, `SkeletonProvider`. |
+| **Behavior**                            | Data fetching, reveal timing, accessibility, layout, server rendering, large lists.       |
+| **Building blocks › SkeletonPrimitive** | The building block, for hand-placed placeholders.                                         |
+
+Use the **Surface** toolbar button to switch between a light and a dark page. Skeletons tint themselves from the surface, so they look right on both with no configuration.
