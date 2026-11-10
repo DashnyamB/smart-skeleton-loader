@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 
 import { AutoSkeleton } from '../AutoSkeleton';
 
@@ -162,4 +163,41 @@ export const CustomThemeColors: Story = {
       </AutoSkeleton>
     </div>
   ),
+};
+
+// theme: 'auto' (the default) applies lightColor/darkColor by OS color scheme
+export const AutoThemeColors: Story = {
+  args: {
+    loading: true,
+    config: {
+      lightColor: '#fcd34d',
+      lightHighlightColor: '#fde68a',
+      darkColor: '#1d4ed8',
+      darkHighlightColor: '#3b82f6',
+    },
+    children: null,
+  },
+  render: (args) => (
+    <div style={{ fontFamily: 'sans-serif' }}>
+      <p style={{ marginTop: 0 }}>
+        No <code>theme</code> set: amber in light mode, blue in dark mode.
+        Switch your OS color scheme to see it follow.
+      </p>
+      <AutoSkeleton {...args}>
+        <div style={{ width: 260 }}>
+          <h4 style={{ margin: '0 0 8px' }}>Follows the OS scheme</h4>
+          <p style={{ margin: 0 }}>
+            Theme-specific colors without forcing a theme.
+          </p>
+        </div>
+      </AutoSkeleton>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const bar = within(canvasElement).getAllByTestId('skeleton')[0];
+    await expect(bar.style.backgroundColor).toBe(
+      dark ? 'rgb(29, 78, 216)' : 'rgb(252, 211, 77)',
+    );
+  },
 };

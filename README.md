@@ -134,11 +134,14 @@ Customize the appearance via the `config` prop:
 
 ### Config Object
 
-| Key              | Type     | Default   | Description                                          |
-| ---------------- | -------- | --------- | ---------------------------------------------------- |
-| `color`          | `string` | `#eee`    | Background color of primitives.                      |
-| `highlightColor` | `string` | `#f5f5f5` | Animation highlight color.                           |
-| `borderRadius`   | `string` | `4px`     | Fallback radius (Auto-detection is attempted first). |
+| Key                                  | Type                          | Default   | Description                                                                                       |
+| ------------------------------------ | ----------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| `color`                              | `string`                      | `#eee`    | Background color of primitives.                                                                   |
+| `highlightColor`                     | `string`                      | `#f5f5f5` | Animation highlight color.                                                                        |
+| `borderRadius`                       | `string`                      | `4px`     | Fallback radius (Auto-detection is attempted first).                                              |
+| `theme`                              | `'light' \| 'dark' \| 'auto'` | `'auto'`  | Force a theme, or follow the OS color scheme.                                                     |
+| `lightColor` / `lightHighlightColor` | `string`                      | -         | Colors used when the (resolved) theme is light.                                                   |
+| `darkColor` / `darkHighlightColor`   | `string`                      | -         | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme. |
 
 ## 🛠 How It Works
 

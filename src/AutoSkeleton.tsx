@@ -9,6 +9,7 @@ import React, {
 import { getTextLineBoxes } from './measure';
 import { SkeletonPrimitive } from './SkeletonPrimitive';
 import { useDisplayedLoading } from './useDisplayedLoading';
+import { usePrefersDark } from './usePrefersDark';
 
 /** Text bars are drawn at this fraction of the line box height, vertically centered. */
 const TEXT_BAR_RATIO = 0.7;
@@ -65,6 +66,10 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   config,
 }) => {
   const theme = config?.theme || 'auto';
+  const prefersDark = usePrefersDark();
+  // 'auto' follows the OS color scheme so light*/dark* colors apply there too
+  const resolvedTheme =
+    theme === 'auto' ? (prefersDark ? 'dark' : 'light') : theme;
   const showSkeleton = useDisplayedLoading(loading, { delay, minDuration });
   // Content stays hidden while data is missing or the skeleton is still held on screen
   const busy = loading || showSkeleton;
@@ -301,14 +306,17 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       };
     }
     // If theme-specific colors are provided, use them
-    if (theme === 'dark' && (config?.darkColor || config?.darkHighlightColor)) {
+    if (
+      resolvedTheme === 'dark' &&
+      (config?.darkColor || config?.darkHighlightColor)
+    ) {
       return {
         color: config.darkColor,
         highlightColor: config.darkHighlightColor,
       };
     }
     if (
-      theme === 'light' &&
+      resolvedTheme === 'light' &&
       (config?.lightColor || config?.lightHighlightColor)
     ) {
       return {
