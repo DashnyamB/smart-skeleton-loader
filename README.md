@@ -26,7 +26,7 @@
   - **Content**: `<img>`, `<input>`, `<button>`, `<textarea>`, `<select>`.
   - **Containers**: Cards and sections with borders/backgrounds/shadows render as static outlines.
 - 🧘 **No Layout Shift**: The real content holds its space while loading.
-- ⏱️ **No Flicker**: Optional `delay` / `minDuration`, plus a crossfade on reveal.
+- ⏱️ **No Flicker**: Fast refetches never flash a skeleton (`delay`), a shown skeleton never blinks (`minDuration`), and the reveal crossfades.
 - ♿ **Accessible**: Hidden content is `inert`, the wrapper is `aria-busy`, and loading is announced.
 - 🎨 **Customizable**: Colors, radius, pulse/shimmer/none, light/dark, per-element overrides.
 - 🪶 **Zero runtime dependencies**, `'use client'`-ready for Next.js.
@@ -69,7 +69,7 @@ const UserList = () => {
   const users = isLoading ? TEMPLATE_USERS : data;
 
   return (
-    <AutoSkeleton loading={isLoading} delay={150} minDuration={400}>
+    <AutoSkeleton loading={isLoading}>
       <div className="list">
         {users.map((user) => (
           <UserCard key={user.id} {...user} />
@@ -125,16 +125,16 @@ Customize the appearance via the `config` prop:
 
 ## 🧩 API Reference
 
-| Prop           | Type            | Default      | Description                                                                    |
-| -------------- | --------------- | ------------ | ------------------------------------------------------------------------------ |
-| `loading`      | `boolean`       | _required_   | Whether to show the skeleton or the actual content.                            |
-| `children`     | `ReactNode`     | -            | The content to measure.                                                        |
-| `config`       | `object`        | -            | Customization options.                                                         |
-| `loadingLabel` | `string`        | `"Loading…"` | Text announced to screen readers while loading.                                |
-| `className`    | `string`        | -            | Class name for the outer wrapper.                                              |
-| `style`        | `CSSProperties` | -            | Style for the outer wrapper, merged over `position: relative; display: block`. |
-| `delay`        | `number`        | `0`          | Wait this long (ms) before showing the skeleton, so fast loads never flash it. |
-| `minDuration`  | `number`        | `0`          | Once shown, keep the skeleton at least this long (ms).                         |
+| Prop           | Type            | Default      | Description                                                                                                                                   |
+| -------------- | --------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `loading`      | `boolean`       | _required_   | Whether to show the skeleton or the actual content.                                                                                           |
+| `children`     | `ReactNode`     | -            | The content to measure.                                                                                                                       |
+| `config`       | `object`        | -            | Customization options.                                                                                                                        |
+| `loadingLabel` | `string`        | `"Loading…"` | Text announced to screen readers while loading.                                                                                               |
+| `className`    | `string`        | -            | Class name for the outer wrapper.                                                                                                             |
+| `style`        | `CSSProperties` | -            | Style for the outer wrapper, merged over `position: relative; display: block`.                                                                |
+| `delay`        | `number`        | `150`        | When `loading` turns on after mount, wait this long (ms) before showing the skeleton, so fast refetches never flash it. Not applied on mount. |
+| `minDuration`  | `number`        | `400`        | Once shown, keep the skeleton at least this long (ms).                                                                                        |
 
 ### Config Object
 
@@ -174,7 +174,7 @@ Customize the appearance via the `config` prop:
 ## ⚠️ Notes
 
 - **Accessibility:** while `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region.
-- **Avoiding flicker:** for most data fetching use `delay={150} minDuration={400}`: loads faster than 150ms show nothing, and a skeleton that does appear stays long enough to read as intentional. The skeleton and content crossfade over 200ms.
+- **Avoiding flicker:** by default a refetch faster than 150ms changes nothing on screen (the current content stays, non-interactive), and a skeleton that does appear stays at least 400ms, then crossfades over 200ms. On mount the skeleton shows immediately. Pass `delay={0} minDuration={0}` for the old instant behaviour.
 - **Server rendering / Next.js:** the package is marked `'use client'`, so it can be imported from Server Components. Server-rendered HTML shows one pulsing block over the reserved space until hydration, then switches to measured skeletons.
 - **Default colors:** light `#e0e0e0`/`#f2f2f2`, dark `#2a2a2a`/`#3d3d3d`, chosen by OS scheme or `theme`, with no CSS import needed. `styles.css` is optional: import it, or set `--auto-skeleton-color` / `--auto-skeleton-highlight` yourself, to theme globally (it also supports a `.dark` class).
 - **Layout:** the wrapper is `display: block`, so it fills its parent like the content it replaces. For inline content pass `style={{ display: 'inline-block' }}`.

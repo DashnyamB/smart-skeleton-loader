@@ -1,7 +1,11 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 
 export interface DisplayedLoadingOptions {
-  /** Wait this long (ms) before showing the skeleton; fast loads never show it. */
+  /**
+   * When loading starts after mount, wait this long (ms) before showing the
+   * skeleton, so fast refetches never show it. Ignored on mount: there is no
+   * content yet, so the skeleton shows immediately (and in server HTML).
+   */
   delay?: number;
   /** Once shown, keep the skeleton at least this long (ms) to avoid a flash. */
   minDuration?: number;
@@ -15,7 +19,7 @@ export function useDisplayedLoading(
   loading: boolean,
   { delay = 0, minDuration = 0 }: DisplayedLoadingOptions = {},
 ): boolean {
-  const [shown, setShown] = useState(() => loading && delay <= 0);
+  const [shown, setShown] = useState(loading);
   const shownAt = useRef(0);
 
   useLayoutEffect(() => {
