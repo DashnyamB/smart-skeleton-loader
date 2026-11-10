@@ -670,3 +670,43 @@ export const ServerRenderFallback: Story = {
     );
   },
 };
+
+// Performance: a long list is scanned once per frame, only while loading
+const LargeListDemo = ({ rows }: { rows: number }) => {
+  const [loading, setLoading] = useState(true);
+  return (
+    <div style={{ fontFamily: 'sans-serif' }}>
+      <button type="button" onClick={() => setLoading((l) => !l)}>
+        Toggle loading ({loading ? 'on' : 'off'})
+      </button>
+      <AutoSkeleton loading={loading} style={{ marginTop: 12, width: 320 }}>
+        <ul style={{ margin: 0, paddingLeft: 16 }} data-testid="large-list">
+          {Array.from({ length: rows }, (_, i) => (
+            <li key={i} style={{ lineHeight: '24px' }}>
+              Row {i + 1}: some list content
+            </li>
+          ))}
+        </ul>
+      </AutoSkeleton>
+    </div>
+  );
+};
+
+export const LargeList: StoryObj<{ rows: number }> = {
+  args: { rows: 300 },
+  argTypes: {
+    rows: { control: { type: 'range', min: 10, max: 1000, step: 10 } },
+  },
+  render: (args) => <LargeListDemo rows={args.rows} />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    // One bar per row
+    await expect(canvas.getAllByTestId('skeleton')).toHaveLength(args.rows);
+
+    // Toggling off and on again re-measures before paint
+    const toggle = canvas.getByRole('button', { name: /toggle loading/i });
+    await userEvent.click(toggle);
+    await userEvent.click(toggle);
+    await expect(canvas.getAllByTestId('skeleton')).toHaveLength(args.rows);
+  },
+};

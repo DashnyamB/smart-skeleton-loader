@@ -6,13 +6,10 @@ import React, {
   useState,
 } from 'react';
 
-import { getTextLineBoxes } from './measure';
+import { sameBoxes, scanSkeletons, type SkeletonBox } from './scan';
 import { SkeletonPrimitive } from './SkeletonPrimitive';
 import { useDisplayedLoading } from './useDisplayedLoading';
 import { usePrefersDark } from './usePrefersDark';
-
-/** Text bars are drawn at this fraction of the line box height, vertically centered. */
-const TEXT_BAR_RATIO = 0.7;
 
 /** Crossfade duration (ms) between the skeleton and the real content. */
 const FADE_MS = 200;
@@ -95,206 +92,49 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   }, [fadingOut]);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [skeletons, setSkeletons] = useState<
-    Array<{
-      key: string;
-      type: 'primitive' | 'container';
-      width: number;
-      height: number;
-      top: number;
-      left: number;
-      borderRadius: string;
-      style?: React.CSSProperties; // For container styles
-    }>
-  >([]);
+  const [skeletons, setSkeletons] = useState<SkeletonBox[]>([]);
   // False until the first client-side measurement (always false on the server)
   const [measured, setMeasured] = useState(false);
+  const borderRadius = config?.borderRadius;
 
-  const updateSkeletons = () => {
-    if (!containerRef.current) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const newSkeletons: typeof skeletons = [];
-
-    // Helper to categorize node
-    const getSkeletonType = (
-      el: Element,
-    ): {
-      type: 'primitive' | 'container';
-      text?: boolean;
-      styles?: React.CSSProperties;
-    } | null => {
-      const tagName = el.tagName.toLowerCase();
-      const style = window.getComputedStyle(el);
-
-      // 1. Atomic Content (always pulse)
-      if (['img', 'input', 'button', 'textarea', 'select'].includes(tagName)) {
-        return { type: 'primitive' };
-      }
-
-      // 2. Text Content (always pulse)
-      const hasText = Array.from(el.childNodes).some(
-        (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
-      );
-      if (hasText) return { type: 'primitive', text: true };
-
-      // 3. Structural Container (static clone)
-      // If it has visible styles but no direct text => it's a container
-      const hasBackground =
-        style.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
-        style.backgroundColor !== 'transparent';
-      const hasBorder =
-        style.borderWidth !== '0px' &&
-        style.borderStyle !== 'none' &&
-        style.borderColor !== 'rgba(0, 0, 0, 0)' &&
-        style.borderColor !== 'transparent';
-      const hasShadow = style.boxShadow !== 'none';
-
-      if (hasBackground || hasBorder || hasShadow) {
-        return {
-          type: 'container',
-          styles: {
-            backgroundColor: style.backgroundColor,
-            border: style.border,
-            borderRadius: style.borderRadius,
-            boxShadow: style.boxShadow,
-          },
-        };
-      }
-
-      return null;
-    };
-
-    // Traverse
-    const walker = document.createTreeWalker(
-      containerRef.current,
-      NodeFilter.SHOW_ELEMENT,
-      {
-        acceptNode: (node) => {
-          const el = node as Element;
-          const style = window.getComputedStyle(el);
-          if (style.display === 'none') return NodeFilter.FILTER_REJECT;
-
-          // If it matches a type, accept it.
-          // Note: We want to accept containers AND traverse their children.
-          // FILTER_ACCEPT does both.
-          if (getSkeletonType(el)) return NodeFilter.FILTER_ACCEPT;
-
-          return NodeFilter.FILTER_SKIP;
-        },
-      },
-    );
-
-    let node = walker.nextNode();
-    let idx = 0;
-    while (node) {
-      const el = node as Element;
-      const rect = el.getBoundingClientRect();
-      const typeData = getSkeletonType(el);
-
-      // Text: one bar per rendered line instead of one block per element
-      const lines = typeData?.text ? getTextLineBoxes(el) : [];
-      if (lines.length > 0) {
-        for (const line of lines) {
-          const height = Math.max(4, line.height * TEXT_BAR_RATIO);
-          newSkeletons.push({
-            key: `${idx++}`,
-            type: 'primitive',
-            width: line.width,
-            height,
-            top: line.top + (line.height - height) / 2 - containerRect.top,
-            left: line.left - containerRect.left,
-            borderRadius:
-              typeof config?.borderRadius === 'number'
-                ? `${config.borderRadius}px`
-                : (config?.borderRadius ?? '4px'),
-          });
-        }
-      } else if (typeData) {
-        // Determine border radius logic
-        let borderRadius =
-          config?.borderRadius ||
-          typeData.styles?.borderRadius ||
-          window.getComputedStyle(el).borderRadius;
-
-        if (typeData.type === 'primitive') {
-          // Auto-detect circle for rounded primitives
-          if (borderRadius === '0px' || !borderRadius) {
-            if (
-              window.getComputedStyle(el).borderRadius === '50%' ||
-              (rect.width === rect.height && rect.width < 50)
-            ) {
-              // Keep heuristic or default
-            }
-            borderRadius = '4px';
-            if (el.tagName.toLowerCase() === 'button') borderRadius = '6px';
-            if (el.tagName.toLowerCase() === 'img') borderRadius = '4px';
-          }
-        }
-
-        newSkeletons.push({
-          key: `${idx++}`,
-          type: typeData.type,
-          width: rect.width,
-          height: rect.height,
-          top: rect.top - containerRect.top,
-          left: rect.left - containerRect.left,
-          borderRadius: borderRadius as string,
-          style: typeData.styles,
-        });
-      }
-
-      node = walker.nextNode();
-    }
-
-    // If no content nodes found, but container has size (maybe a canvas or simple div w/ background),
-    // Fallback? Or maybe user wants the single block behavior.
-    // Let's add that fallback if newSkeletons is empty but container has dimension.
-    if (
-      newSkeletons.length === 0 &&
-      (containerRect.width > 0 || containerRect.height > 0)
-    ) {
-      newSkeletons.push({
-        key: 'fallback',
-        type: 'primitive',
-        width: containerRect.width,
-        height: containerRect.height,
-        top: 0,
-        left: 0,
-        borderRadius: (config?.borderRadius as string) || '4px',
-      });
-    }
-
-    setSkeletons(newSkeletons);
-    setMeasured(true);
-  };
-
-  // Layout effect: measure before paint so the overlay never shows a frame without bars
+  // Measure only while the skeleton is on screen. Layout effect: the first scan
+  // happens before paint, so the overlay never shows a frame without bars.
   useLayoutEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!showSkeleton || !container) return;
 
-    // Initial measure
-    updateSkeletons();
+    const scan = () => {
+      const next = scanSkeletons(container, borderRadius);
+      setSkeletons((prev) => (sameBoxes(prev, next) ? prev : next));
+      setMeasured(true);
+    };
+    scan();
 
-    const observer = new ResizeObserver(() => {
-      updateSkeletons();
-    });
-
-    observer.observe(containerRef.current);
-    // Also observe children mutations if possible, but ResizeObserver on container catches layout changes often.
-    // For robust child changes:
-    const mutationObserver = new MutationObserver(() => updateSkeletons());
-    mutationObserver.observe(containerRef.current, {
+    // Coalesce bursts of resize/mutation events into one scan per frame
+    let frame = 0;
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        scan();
+      });
+    };
+    const resizeObserver = new ResizeObserver(schedule);
+    resizeObserver.observe(container);
+    const mutationObserver = new MutationObserver(schedule);
+    mutationObserver.observe(container, {
       childList: true,
       subtree: true,
       characterData: true,
+      attributes: true,
     });
 
     return () => {
-      observer.disconnect();
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
       mutationObserver.disconnect();
     };
-  }, [showSkeleton, children]); // Re-scan when children change
+  }, [showSkeleton, borderRadius]);
 
   // Determine effective colors based on theme
   const getEffectiveColors = () => {
