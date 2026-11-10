@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.2.0...v2.3.0) (2026-11-10)
+
+
+### Features
+
+* adaptive skeletons ([#46](https://github.com/DashnyamB/smart-skeleton-loader/issues/46)) ([02e4201](https://github.com/DashnyamB/smart-skeleton-loader/commit/02e420131cfd6473f66a494d242bc8fb9fbaa2ba)), closes [#40](https://github.com/DashnyamB/smart-skeleton-loader/issues/40) [#41](https://github.com/DashnyamB/smart-skeleton-loader/issues/41) [#42](https://github.com/DashnyamB/smart-skeleton-loader/issues/42) [#43](https://github.com/DashnyamB/smart-skeleton-loader/issues/43) [#44](https://github.com/DashnyamB/smart-skeleton-loader/issues/44)
+
 # [2.2.0](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.1.3...v2.2.0) (2026-11-10)
 
 
