@@ -58,6 +58,10 @@ const toCss = (r: string | number | undefined) =>
 /**
  * Walks `container` and returns the skeleton boxes to draw, relative to it.
  * Reads each element's computed style exactly once.
+ *
+ * Per-element overrides:
+ * - `data-skeleton-ignore`: draw nothing for the element or its subtree
+ * - `data-skeleton-block`: draw the element as one block, ignoring its children
  */
 export function scanSkeletons(
   container: HTMLElement,
@@ -69,8 +73,30 @@ export function scanSkeletons(
   let idx = 0;
 
   const visit = (el: Element) => {
+    // Opt-out: no skeleton for this element or anything inside it
+    if (el.hasAttribute('data-skeleton-ignore')) return;
+
     const style = window.getComputedStyle(el);
     if (style.display === 'none') return;
+
+    // Opt-in: draw the whole element as one block, skip its children
+    if (el.hasAttribute('data-skeleton-block')) {
+      const rect = el.getBoundingClientRect();
+      boxes.push({
+        key: `${idx++}`,
+        type: 'primitive',
+        width: rect.width,
+        height: rect.height,
+        top: rect.top - origin.top,
+        left: rect.left - origin.left,
+        borderRadius:
+          radiusOverride ??
+          (style.borderRadius && style.borderRadius !== '0px'
+            ? style.borderRadius
+            : '4px'),
+      });
+      return;
+    }
 
     const kind = classify(el, style);
     if (kind?.type === 'primitive' && kind.text) {

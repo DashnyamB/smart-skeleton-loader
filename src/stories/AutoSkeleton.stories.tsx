@@ -775,3 +775,72 @@ export const AnimationStyles: Story = {
     );
   },
 };
+
+// Per-element overrides: data-skeleton-block and data-skeleton-ignore
+export const ElementOverrides: Story = {
+  args: { loading: true, children: null },
+  render: (args) => (
+    <SideBySide args={args}>
+      <div
+        style={{
+          width: 300,
+          padding: 16,
+          border: '1px solid #ddd',
+          borderRadius: 8,
+          fontFamily: 'sans-serif',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <h4 style={{ margin: 0 }}>Weekly revenue</h4>
+          {/* Decorative badge: no skeleton */}
+          <span
+            data-skeleton-ignore
+            data-testid="badge"
+            style={{ fontSize: 12 }}
+          >
+            beta
+          </span>
+        </div>
+        {/* A chart with many parts: one block instead of dozens of bars */}
+        <div
+          data-skeleton-block
+          data-testid="chart"
+          style={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: 6,
+            height: 100,
+            marginTop: 12,
+            borderRadius: 6,
+          }}
+        >
+          {[40, 70, 55, 90, 65, 80, 50].map((h, i) => (
+            <span
+              key={i}
+              style={{ flex: 1, height: `${h}%`, background: '#7c9cf5' }}
+            >
+              {' '}
+            </span>
+          ))}
+        </div>
+      </div>
+    </SideBySide>
+  ),
+  play: async ({ canvasElement }) => {
+    // First SideBySide column is the loading one
+    const canvas = within(canvasElement);
+    const chart = canvas.getAllByTestId('chart')[0].getBoundingClientRect();
+    const badge = canvas.getAllByTestId('badge')[0].getBoundingClientRect();
+    const bars = canvas
+      .getAllByTestId('skeleton')
+      .map((b) => b.getBoundingClientRect());
+    const inside = (r: DOMRect, area: DOMRect) =>
+      r.left >= area.left - 1 &&
+      r.right <= area.right + 1 &&
+      r.top >= area.top - 1 &&
+      r.bottom <= area.bottom + 1;
+
+    await expect(bars.filter((r) => inside(r, chart))).toHaveLength(1);
+    await expect(bars.filter((r) => inside(r, badge))).toHaveLength(0);
+  },
+};

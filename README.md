@@ -144,6 +144,19 @@ Customize the appearance via the `config` prop:
 | `lightColor` / `lightHighlightColor` | `string`                         | -         | Colors used when the (resolved) theme is light.                                                   |
 | `darkColor` / `darkHighlightColor`   | `string`                         | -         | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme. |
 
+### Per-element overrides
+
+| Attribute              | Effect                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `data-skeleton-ignore` | No skeleton for this element or anything inside it (e.g. decorative badges).              |
+| `data-skeleton-block`  | Draw the element as one block and skip its children (e.g. charts, maps, complex widgets). |
+
+```tsx
+<div data-skeleton-block>
+  <Chart data={data} />
+</div>
+```
+
 ## 🛠 How It Works
 
 1.  **Invisible Measurement**: When `loading={true}`, your children are rendered in the DOM but hidden using `opacity: 0`. This allows them to take up space and be measured by the browser.

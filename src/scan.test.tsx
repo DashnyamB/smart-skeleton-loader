@@ -136,3 +136,39 @@ describe('AutoSkeleton scanning cost', () => {
     expect(spy).toHaveBeenCalledTimes(14);
   });
 });
+
+describe('per-element overrides', () => {
+  const scanHtml = (html: string) => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    document.body.append(host);
+    const boxes = scan.scanSkeletons(host);
+    host.remove();
+    return boxes;
+  };
+
+  it('data-skeleton-ignore skips the element and its subtree', () => {
+    const boxes = scanHtml(`
+      <div data-skeleton-ignore style="background-color: red">
+        <button></button><img alt="" />
+      </div>
+      <button></button>
+    `);
+    expect(boxes).toHaveLength(1);
+  });
+
+  it('data-skeleton-block draws one block and skips children', () => {
+    const boxes = scanHtml(`
+      <div data-skeleton-block style="border-radius: 12px">
+        <img alt="" /><button></button><span>text</span>
+      </div>
+    `);
+    expect(boxes).toHaveLength(1);
+    expect(boxes[0]).toMatchObject({ type: 'primitive', borderRadius: '12px' });
+  });
+
+  it('data-skeleton-block defaults to a 4px radius', () => {
+    const [block] = scanHtml('<div data-skeleton-block></div>');
+    expect(block.borderRadius).toBe('4px');
+  });
+});
