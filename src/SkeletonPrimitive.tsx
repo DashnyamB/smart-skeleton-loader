@@ -21,6 +21,11 @@ export interface SkeletonPrimitiveProps extends React.HTMLAttributes<HTMLDivElem
   ink?: string;
   /** What the bar stands for; adds `auto-skeleton--{kind}` and `data-skeleton-kind`. */
   kind?: BarKind;
+  /**
+   * Shimmer only. `'sync'` (default): every bar on the page shares one sweep.
+   * `'local'`: each bar sweeps on its own.
+   */
+  shimmer?: 'sync' | 'local';
 }
 
 /** Built-in defaults: used when no --auto-skeleton-* variable or color prop is set. */
@@ -61,8 +66,19 @@ const SKELETON_CSS = `
   background-repeat: no-repeat;
   animation: auto-skeleton-shimmer 1.5s linear infinite;
 }
+/* One page-wide sweep: the gradient is pinned to the viewport, so bars line up */
+.auto-skeleton--shimmer.auto-skeleton--sync { background-attachment: fixed; }
 @media (prefers-reduced-motion: reduce) {
   .auto-skeleton { animation: none; background-image: none; }
+}
+/* Windows High Contrast & co.: translucent tints would be forced away, use a system color */
+@media (forced-colors: active) {
+  .auto-skeleton {
+    forced-color-adjust: none;
+    background-color: GrayText !important;
+    background-image: none;
+    animation: none;
+  }
 }
 `;
 
@@ -76,6 +92,7 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
   adaptive = true,
   ink,
   kind,
+  shimmer = 'sync',
   className,
   style,
   ...props
@@ -83,6 +100,9 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
   const classes = ['auto-skeleton'];
   if (adaptive) classes.push('auto-skeleton--adaptive');
   if (animation !== 'none') classes.push(`auto-skeleton--${animation}`);
+  if (animation === 'shimmer' && shimmer === 'sync') {
+    classes.push('auto-skeleton--sync');
+  }
   if (kind) classes.push(`auto-skeleton--${kind}`);
   if (className) classes.push(className);
 

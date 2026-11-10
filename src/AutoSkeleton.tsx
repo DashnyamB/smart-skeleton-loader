@@ -53,6 +53,8 @@ export interface AutoSkeletonProps {
     theme?: 'light' | 'dark' | 'auto';
     /** `pulse` (default), `shimmer`, or `none`. */
     animation?: SkeletonAnimation;
+    /** Shimmer only: `'sync'` (default) shares one sweep across all bars, `'local'` sweeps each bar. */
+    shimmer?: 'sync' | 'local';
     /** Extra class names per kind of bar, e.g. `{ avatar: 'ring-2', heading: 'w-1/2' }`. */
     classNames?: Partial<Record<BarKind, string>>;
     /** Extra inline styles per kind of bar; merged over the measured size and position. */
@@ -269,6 +271,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
               color={effectiveColors.color}
               highlightColor={effectiveColors.highlightColor}
               animation={config?.animation}
+              shimmer={config?.shimmer}
             />
           )}
           {skeletons.map((sk) => (
@@ -290,6 +293,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
                   color={effectiveColors.color}
                   highlightColor={effectiveColors.highlightColor}
                   animation={config?.animation}
+                  shimmer={config?.shimmer}
                 />
               ) : (
                 /* Container Clone: Renders static style */
