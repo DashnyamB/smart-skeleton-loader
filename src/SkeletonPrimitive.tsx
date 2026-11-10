@@ -1,21 +1,51 @@
 import React from 'react';
 
+export type SkeletonAnimation = 'pulse' | 'shimmer' | 'none';
+
 export interface SkeletonPrimitiveProps extends React.HTMLAttributes<HTMLDivElement> {
   width?: string | number;
   height?: string | number;
   borderRadius?: string | number;
   color?: string;
   highlightColor?: string;
+  /** `pulse` (default) fades the color, `shimmer` sweeps a highlight, `none` is static. */
+  animation?: SkeletonAnimation;
 }
 
-const PULSE_CSS = `
+/** Built-in defaults: used when no --auto-skeleton-* variable or color prop is set. */
+export const DEFAULT_COLORS = {
+  light: { color: '#e0e0e0', highlight: '#f2f2f2' },
+  dark: { color: '#2a2a2a', highlight: '#3d3d3d' },
+} as const;
+
+const vars = (c: { color: string; highlight: string }) =>
+  `--auto-skeleton-default-c: ${c.color}; --auto-skeleton-default-h: ${c.highlight};`;
+
+const SKELETON_CSS = `
+.auto-skeleton { ${vars(DEFAULT_COLORS.light)} }
+@media (prefers-color-scheme: dark) {
+  .auto-skeleton { ${vars(DEFAULT_COLORS.dark)} }
+}
+[data-skeleton-theme='light'] .auto-skeleton { ${vars(DEFAULT_COLORS.light)} }
+[data-skeleton-theme='dark'] .auto-skeleton { ${vars(DEFAULT_COLORS.dark)} }
+
 @keyframes auto-skeleton-pulse {
   0%, 100% { background-color: var(--auto-skeleton-c); }
   50% { background-color: var(--auto-skeleton-h); }
 }
-.auto-skeleton { animation: auto-skeleton-pulse 1.5s ease-in-out infinite; }
+@keyframes auto-skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -100% 0; }
+}
+.auto-skeleton--pulse { animation: auto-skeleton-pulse 1.5s ease-in-out infinite; }
+.auto-skeleton--shimmer {
+  background-image: linear-gradient(90deg, transparent 0%, var(--auto-skeleton-h) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: auto-skeleton-shimmer 1.5s linear infinite;
+}
 @media (prefers-reduced-motion: reduce) {
-  .auto-skeleton { animation: none; }
+  .auto-skeleton { animation: none; background-image: none; }
 }
 `;
 
@@ -23,20 +53,25 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
   width,
   height,
   borderRadius = '4px',
-  color = 'var(--auto-skeleton-color, #eee)',
-  highlightColor = 'var(--auto-skeleton-highlight, #f5f5f5)',
+  color = 'var(--auto-skeleton-color, var(--auto-skeleton-default-c))',
+  highlightColor = 'var(--auto-skeleton-highlight, var(--auto-skeleton-default-h))',
+  animation = 'pulse',
   className,
   style,
   ...props
 }) => {
+  const classes = ['auto-skeleton'];
+  if (animation !== 'none') classes.push(`auto-skeleton--${animation}`);
+  if (className) classes.push(className);
+
   return (
     <>
       {/* React 19 hoists this into <head> and dedupes it by href */}
-      <style href="auto-skeleton-pulse" precedence="default">
-        {PULSE_CSS}
+      <style href="auto-skeleton" precedence="default">
+        {SKELETON_CSS}
       </style>
       <div
-        className={className ? `auto-skeleton ${className}` : 'auto-skeleton'}
+        className={classes.join(' ')}
         style={
           {
             width,

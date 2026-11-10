@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 
 import { sameBoxes, scanSkeletons, type SkeletonBox } from './scan';
-import { SkeletonPrimitive } from './SkeletonPrimitive';
+import { SkeletonPrimitive, type SkeletonAnimation } from './SkeletonPrimitive';
 import { useDisplayedLoading } from './useDisplayedLoading';
 import { usePrefersDark } from './usePrefersDark';
 
@@ -32,6 +32,8 @@ export interface AutoSkeletonProps {
     highlightColor?: string;
     borderRadius?: string | number;
     theme?: 'light' | 'dark' | 'auto';
+    /** `pulse` (default), `shimmer`, or `none`. */
+    animation?: SkeletonAnimation;
     // Theme-specific colors (override CSS variables)
     lightColor?: string;
     lightHighlightColor?: string;
@@ -217,6 +219,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
               height="100%"
               color={effectiveColors.color}
               highlightColor={effectiveColors.highlightColor}
+              animation={config?.animation}
             />
           )}
           {skeletons.map((sk) => (
@@ -231,6 +234,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
                   borderRadius={sk.borderRadius}
                   color={effectiveColors.color}
                   highlightColor={effectiveColors.highlightColor}
+                  animation={config?.animation}
                 />
               ) : (
                 /* Container Clone: Renders static style */
