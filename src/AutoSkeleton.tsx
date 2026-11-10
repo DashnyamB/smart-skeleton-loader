@@ -2,9 +2,13 @@ import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
 import { getTextLineBoxes } from './measure';
 import { SkeletonPrimitive } from './SkeletonPrimitive';
+import { useDisplayedLoading } from './useDisplayedLoading';
 
 /** Text bars are drawn at this fraction of the line box height, vertically centered. */
 const TEXT_BAR_RATIO = 0.7;
+
+/** Crossfade duration (ms) between the skeleton and the real content. */
+const FADE_MS = 200;
 
 export interface AutoSkeletonProps {
   loading: boolean;
@@ -15,6 +19,10 @@ export interface AutoSkeletonProps {
   className?: string;
   /** Style for the outer wrapper; merged over the defaults (`position: relative; display: block`). */
   style?: React.CSSProperties;
+  /** Wait this long (ms) before showing the skeleton, so fast loads never flash it. */
+  delay?: number;
+  /** Once shown, keep the skeleton at least this long (ms). */
+  minDuration?: number;
   config?: {
     color?: string;
     highlightColor?: string;
@@ -46,9 +54,28 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   loadingLabel = 'Loading…',
   className,
   style,
+  delay = 0,
+  minDuration = 0,
   config,
 }) => {
   const theme = config?.theme || 'auto';
+  const showSkeleton = useDisplayedLoading(loading, { delay, minDuration });
+  // Content stays hidden while data is missing or the skeleton is still held on screen
+  const busy = loading || showSkeleton;
+
+  // Keep the overlay mounted while it fades out (set-state-during-render avoids a blank frame)
+  const [fadingOut, setFadingOut] = useState(false);
+  const [prevShowSkeleton, setPrevShowSkeleton] = useState(showSkeleton);
+  if (prevShowSkeleton !== showSkeleton) {
+    setPrevShowSkeleton(showSkeleton);
+    setFadingOut(!showSkeleton);
+  }
+  useEffect(() => {
+    if (!fadingOut) return;
+    const timer = setTimeout(() => setFadingOut(false), FADE_MS);
+    return () => clearTimeout(timer);
+  }, [fadingOut]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [skeletons, setSkeletons] = useState<
     Array<{
@@ -245,7 +272,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       observer.disconnect();
       mutationObserver.disconnect();
     };
-  }, [loading, children]); // Re-scan when children change
+  }, [showSkeleton, children]); // Re-scan when children change
 
   // Determine effective colors based on theme
   const getEffectiveColors = () => {
@@ -283,27 +310,28 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       className={className}
       style={{ position: 'relative', display: 'block', ...style }}
       {...(theme !== 'auto' ? { 'data-skeleton-theme': theme } : {})}
-      aria-busy={loading}
+      aria-busy={busy}
     >
       {/* <output> is not reliably announced as a live region; role="status" is. */}
       {/* oxlint-disable-next-line jsx-a11y/prefer-tag-over-role */}
       <span role="status" style={VISUALLY_HIDDEN}>
-        {loading ? loadingLabel : ''}
+        {busy ? loadingLabel : ''}
       </span>
       <div
         ref={containerRef}
         style={{
-          opacity: loading ? 0 : 1,
-          transition: 'opacity 0.2s ease', // Smooth transition when loading finishes
+          opacity: busy ? 0 : 1,
+          transition: `opacity ${FADE_MS}ms ease`,
         }}
-        aria-hidden={loading}
-        inert={loading}
+        aria-hidden={busy}
+        inert={busy}
       >
         {children}
       </div>
 
-      {loading && (
+      {(showSkeleton || fadingOut) && (
         <div
+          data-testid="skeleton-overlay"
           style={{
             position: 'absolute',
             top: 0,
@@ -311,6 +339,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
             width: '100%',
             height: '100%',
             pointerEvents: 'none',
+            opacity: showSkeleton ? 1 : 0,
+            transition: `opacity ${FADE_MS}ms ease`,
           }}
         >
           {skeletons.map((sk) => (

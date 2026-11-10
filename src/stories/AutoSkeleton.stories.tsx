@@ -531,3 +531,84 @@ export const MultiLineParagraph: Story = {
     await expect(widths[widths.length - 1]).toBeLessThan(Math.max(...widths));
   },
 };
+
+// Reveal timing: delay + minDuration stop fast loads from flashing a skeleton
+const TimingCard = ({ title }: { title: string }) => (
+  <div
+    style={{
+      width: 240,
+      padding: 16,
+      border: '1px solid #ddd',
+      borderRadius: 8,
+      fontFamily: 'sans-serif',
+    }}
+  >
+    <h4 style={{ margin: '0 0 8px' }}>{title}</h4>
+    <p style={{ margin: 0 }}>Content arrives after a simulated request.</p>
+  </div>
+);
+
+const RevealTimingDemo = ({
+  delay,
+  minDuration,
+}: {
+  delay: number;
+  minDuration: number;
+}) => {
+  const [loading, setLoading] = useState(false);
+  const load = (ms: number) => {
+    setLoading(true);
+    setTimeout(() => setLoading(false), ms);
+  };
+  return (
+    <div style={{ fontFamily: 'sans-serif' }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <button type="button" onClick={() => load(60)}>
+          Fast load (60ms)
+        </button>
+        <button type="button" onClick={() => load(2000)}>
+          Slow load (2s)
+        </button>
+      </div>
+      <div style={{ display: 'flex', gap: 24 }}>
+        <div data-testid="naive">
+          <p style={{ fontSize: 12, color: '#666' }}>Naive (0 / 0)</p>
+          <AutoSkeleton loading={loading}>
+            <TimingCard title="No timing" />
+          </AutoSkeleton>
+        </div>
+        <div data-testid="tuned">
+          <p style={{ fontSize: 12, color: '#666' }}>
+            Tuned ({delay}ms delay / {minDuration}ms min)
+          </p>
+          <AutoSkeleton
+            loading={loading}
+            delay={delay}
+            minDuration={minDuration}
+          >
+            <TimingCard title="With timing" />
+          </AutoSkeleton>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const RevealTiming: StoryObj<{ delay: number; minDuration: number }> = {
+  args: { delay: 150, minDuration: 400 },
+  argTypes: {
+    delay: { control: { type: 'range', min: 0, max: 1000, step: 50 } },
+    minDuration: { control: { type: 'range', min: 0, max: 2000, step: 100 } },
+  },
+  render: (args) => <RevealTimingDemo {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const overlay = (id: string) =>
+      within(canvas.getByTestId(id)).queryByTestId('skeleton-overlay');
+
+    await userEvent.click(canvas.getByRole('button', { name: /fast load/i }));
+    // Naive flashes a skeleton; tuned stays quiet during its delay
+    await expect(overlay('naive')).not.toBeNull();
+    await expect(overlay('tuned')).toBeNull();
+  },
+};
