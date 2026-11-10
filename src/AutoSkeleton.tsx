@@ -1,6 +1,10 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
+import { getTextLineBoxes } from './measure';
 import { SkeletonPrimitive } from './SkeletonPrimitive';
+
+/** Text bars are drawn at this fraction of the line box height, vertically centered. */
+const TEXT_BAR_RATIO = 0.7;
 
 export interface AutoSkeletonProps {
   loading: boolean;
@@ -70,6 +74,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       el: Element,
     ): {
       type: 'primitive' | 'container';
+      text?: boolean;
       styles?: React.CSSProperties;
     } | null => {
       const tagName = el.tagName.toLowerCase();
@@ -84,7 +89,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       const hasText = Array.from(el.childNodes).some(
         (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
       );
-      if (hasText) return { type: 'primitive' };
+      if (hasText) return { type: 'primitive', text: true };
 
       // 3. Structural Container (static clone)
       // If it has visible styles but no direct text => it's a container
@@ -140,7 +145,25 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       const rect = el.getBoundingClientRect();
       const typeData = getSkeletonType(el);
 
-      if (typeData) {
+      // Text: one bar per rendered line instead of one block per element
+      const lines = typeData?.text ? getTextLineBoxes(el) : [];
+      if (lines.length > 0) {
+        for (const line of lines) {
+          const height = Math.max(4, line.height * TEXT_BAR_RATIO);
+          newSkeletons.push({
+            key: `${idx++}`,
+            type: 'primitive',
+            width: line.width,
+            height,
+            top: line.top + (line.height - height) / 2 - containerRect.top,
+            left: line.left - containerRect.left,
+            borderRadius:
+              typeof config?.borderRadius === 'number'
+                ? `${config.borderRadius}px`
+                : (config?.borderRadius ?? '4px'),
+          });
+        }
+      } else if (typeData) {
         // Determine border radius logic
         let borderRadius =
           config?.borderRadius ||
