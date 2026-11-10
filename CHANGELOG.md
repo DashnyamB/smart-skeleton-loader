@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.1.0...v2.1.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* support server components and avoid a blank server-rendered frame ([#28](https://github.com/DashnyamB/smart-skeleton-loader/issues/28)) ([a8078ed](https://github.com/DashnyamB/smart-skeleton-loader/commit/a8078ede8aee341ef3a6fd31d01e939fdf237f57))
+
 # [2.1.0](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.0.0...v2.1.0) (2026-11-10)
 
 
