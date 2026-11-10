@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
+import { renderToString } from 'react-dom/server';
 import { expect, userEvent, within } from 'storybook/test';
 
 import { AutoSkeleton } from '../AutoSkeleton';
@@ -627,5 +628,45 @@ export const RevealTiming: StoryObj<{ delay: number; minDuration: number }> = {
       await expect(overlay('tuned')).toBeNull();
     }
     await expect(minOpacity).toBe(1);
+  },
+};
+
+// Server rendering: the HTML a server sends before hydration (no measurement possible)
+const serverHtml = renderToString(
+  <AutoSkeleton loading>
+    <div
+      style={{
+        width: 280,
+        padding: 16,
+        border: '1px solid #ddd',
+        borderRadius: 8,
+        fontFamily: 'sans-serif',
+      }}
+    >
+      <h4 style={{ margin: '0 0 8px' }}>Server-rendered card</h4>
+      <p style={{ margin: 0 }}>
+        Before hydration this area pulses as one block.
+      </p>
+    </div>
+  </AutoSkeleton>,
+);
+
+export const ServerRenderFallback: Story = {
+  args: { loading: true, children: null },
+  render: () => (
+    <div
+      data-testid="server-html"
+      dangerouslySetInnerHTML={{ __html: serverHtml }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const root = within(canvasElement).getByTestId('server-html');
+    const block = root.querySelector('[data-testid="skeleton"]') as HTMLElement;
+    await expect(block).not.toBeNull();
+    const card = root.querySelector('[aria-busy]') as HTMLElement;
+    // The fallback block covers the space the hidden card reserves
+    await expect(block.getBoundingClientRect().height).toBe(
+      card.getBoundingClientRect().height,
+    );
   },
 };

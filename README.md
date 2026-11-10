@@ -154,6 +154,7 @@ Customize the appearance via the `config` prop:
 
 - **Accessibility:** while `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region.
 - **Avoiding flicker:** for most data fetching use `delay={150} minDuration={400}`: loads faster than 150ms show nothing, and a skeleton that does appear stays long enough to read as intentional. The skeleton and content crossfade over 200ms.
+- **Server rendering / Next.js:** the package is marked `'use client'`, so it can be imported from Server Components. Server-rendered HTML shows one pulsing block over the reserved space until hydration, then switches to measured skeletons.
 - **Layout:** the wrapper is `display: block`, so it fills its parent like the content it replaces. For inline content pass `style={{ display: 'inline-block' }}`.
 - **Placeholders**: For images, ensure you provide a `src` (even a placeholder) or explicit `width/height` style so the image takes up space to be measured.
 - **Opacity vs Visibility**: We use `opacity: 0` to hide content. This ensures that even elements that might behave strangely with `visibility: hidden` are correctly measured.

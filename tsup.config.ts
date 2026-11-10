@@ -7,6 +7,7 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
-  treeshake: true,
   external: ['react', 'react-dom'],
+  // Hooks inside: mark the entry as a Client Component for React Server Components
+  banner: { js: "'use client';" },
 });

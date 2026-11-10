@@ -13,6 +13,8 @@ export default defineConfig({
       configDir: path.join(dirname, '.storybook'),
     }),
   ],
+  // Pre-bundle so the first run doesn't reload mid-test (used by the SSR story)
+  optimizeDeps: { include: ['react-dom/server'] },
   test: {
     globals: true,
     browser: {

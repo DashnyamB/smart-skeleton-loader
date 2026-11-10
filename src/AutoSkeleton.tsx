@@ -102,6 +102,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       style?: React.CSSProperties; // For container styles
     }>
   >([]);
+  // False until the first client-side measurement (always false on the server)
+  const [measured, setMeasured] = useState(false);
 
   const updateSkeletons = () => {
     if (!containerRef.current) return;
@@ -259,6 +261,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
     }
 
     setSkeletons(newSkeletons);
+    setMeasured(true);
   };
 
   // Layout effect: measure before paint so the overlay never shows a frame without bars
@@ -358,6 +361,16 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
             transition: `opacity ${FADE_MS}ms ease`,
           }}
         >
+          {!measured && (
+            // Server render / before hydration: nothing can be measured yet, so
+            // cover the reserved space with one block instead of showing nothing
+            <SkeletonPrimitive
+              width="100%"
+              height="100%"
+              color={effectiveColors.color}
+              highlightColor={effectiveColors.highlightColor}
+            />
+          )}
           {skeletons.map((sk) => (
             <div
               key={sk.key}
