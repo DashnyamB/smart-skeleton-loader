@@ -1,58 +1,102 @@
-# smart-skeleton-loader
-
-> **The smartest skeleton loader for React.**
-> Automatically generate perfectly matching skeletons by measuring your actual components.
-
-[![npm version](https://img.shields.io/npm/v/smart-skeleton-loader.svg)](https://www.npmjs.com/package/smart-skeleton-loader)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-orange.svg?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/dashnyamkkq)
-
 <div align="center">
 
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/dashnyamkkq)
+# smart-skeleton-loader
+
+### Stop hand-writing skeleton screens.
+
+**Wrap any React component. Get a pixel-perfect loading skeleton, generated from your real layout.**
+
+[![npm version](https://img.shields.io/npm/v/smart-skeleton-loader.svg)](https://www.npmjs.com/package/smart-skeleton-loader)
+[![npm downloads](https://img.shields.io/npm/dm/smart-skeleton-loader.svg)](https://www.npmjs.com/package/smart-skeleton-loader)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/smart-skeleton-loader)](https://bundlephobia.com/package/smart-skeleton-loader)
+[![types](https://img.shields.io/npm/types/smart-skeleton-loader)](https://www.npmjs.com/package/smart-skeleton-loader)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**~4.5 kB gzipped** · **Zero dependencies** · **React 19** · **Next.js ready** · **TypeScript**
 
 </div>
 
-`smart-skeleton-loader` eliminates the need to manually create and maintain skeleton versions of your components. It renders your actual component responsibly (hidden), measures its layout, and overlays precise skeletons for text, images, and containers.
+```tsx
+<AutoSkeleton loading={isLoading}>
+  <UserCard user={user} />
+</AutoSkeleton>
+```
 
-> [!IMPORTANT]
-> **Enjoying this project?** If you find `smart-skeleton-loader` useful, please consider [buying me a coffee](https://buymeacoffee.com/dashnyamkkq) to support further development! 💖
+That's the whole API. No `<Skeleton width={120} />` copies of every component, no skeletons that drift out of sync when the design changes.
+
+---
+
+## Why smart-skeleton-loader?
+
+Hand-written skeletons are a second copy of your UI. Every time a card gets a new field, a font size changes, or a layout goes responsive, someone has to update the skeleton too, and usually nobody does.
+
+`smart-skeleton-loader` takes a different approach: it renders your **real** component invisibly, measures what the browser actually laid out, and draws a skeleton exactly on top of it.
+
+|                                   | Hand-written skeletons  |  **smart-skeleton-loader**   |
+| --------------------------------- | :---------------------: | :--------------------------: |
+| Extra skeleton code per component |    😩 Yes, all of it    |           ✅ None            |
+| Stays in sync with design changes |    ❌ Manual updates    |         ✅ Automatic         |
+| Matches responsive layouts        | ⚠️ Separate breakpoints |       ✅ Measured live       |
+| One bar per wrapped text line     |      ❌ Guesswork       |           ✅ Exact           |
+| Layout shift on reveal            |        ⚠️ Often         |           ✅ Zero            |
+| Flicker on fast refetches         |        ⚠️ Often         |     ✅ Built-in `delay`      |
+| Screen-reader support             |      🤷 Up to you       | ✅ `aria-busy` + live region |
 
 ## ✨ Features
 
-- 📏 **Auto-Measurement**: Measures your real rendered layout, so the skeleton always matches it.
-- 🧠 **Smart Detection**:
-  - **Text**: One bar per rendered line, with a naturally shorter last line.
-  - **Content**: `<img>`, `<input>`, `<button>`, `<textarea>`, `<select>`.
-  - **Containers**: Cards and sections with borders/backgrounds/shadows render as static outlines.
-- 🧘 **No Layout Shift**: The real content holds its space while loading.
-- ⏱️ **No Flicker**: Fast refetches never flash a skeleton (`delay`), a shown skeleton never blinks (`minDuration`), and the reveal crossfades.
-- ♿ **Accessible**: Hidden content is `inert`, the wrapper is `aria-busy`, and loading is announced.
-- 🎨 **Customizable**: Colors, radius, pulse/shimmer/none, light/dark, per-element overrides.
-- 🪶 **Zero runtime dependencies**, `'use client'`-ready for Next.js.
+- 📏 **Measures your real layout.** Text, images, inputs, buttons and cards are detected and skeletonized automatically.
+- 📝 **Line-accurate text.** One bar per rendered line, with a naturally shorter last line, just like the real paragraph.
+- 🃏 **Understands containers.** Cards with borders, backgrounds or shadows keep their look; only the content inside pulses.
+- 🧘 **Zero layout shift.** The real content holds its space the whole time, then crossfades in. Your CLS score will thank you.
+- ⏱️ **No flicker, ever.** Fast refetches never flash a skeleton (`delay`), and a skeleton that does appear never blinks away (`minDuration`).
+- ♿ **Accessible by default.** Hidden content is `inert`, the wrapper is `aria-busy`, and loading is announced to screen readers.
+- 🌗 **Light, dark and auto themes.** Follows the OS color scheme live, or force a theme. Pulse, shimmer or static animation, and `prefers-reduced-motion` is respected.
+- ⚡ **Next.js & SSR friendly.** Ships with `'use client'`, works from Server Components, and shows a placeholder before hydration.
+- 🪶 **Tiny and dependency-free.** ~4.5 kB gzipped, nothing but `react` as a peer. No CSS import required.
 
 ## 📦 Installation
 
 ```bash
 npm install smart-skeleton-loader
-# or
-yarn add smart-skeleton-loader
 ```
 
-_Zero runtime dependencies — only `react` (19+) as a peer._
+```bash
+pnpm add smart-skeleton-loader
+# or
+yarn add smart-skeleton-loader
+# or
+bun add smart-skeleton-loader
+```
 
-## 🚀 Usage
+Requires `react` 19+. That's it: no providers, no CSS to import, no config.
 
-> [!IMPORTANT]
-> **AutoSkeleton measures what is rendered.** While loading, render your component with
-> realistic **placeholder data**: an empty `<h3></h3>` or a missing image has no size, so
-> it gets no skeleton. This is the one thing to remember.
+## 🚀 Quick start
 
-### 1. Data fetching (the template pattern)
+```tsx
+import { AutoSkeleton } from 'smart-skeleton-loader';
 
-You usually start with no data. Render a few "template" items with placeholder data while
-loading. AutoSkeleton measures them and draws the skeleton, then crossfades to the real
-items.
+const UserProfile = ({ loading, user }) => (
+  <AutoSkeleton loading={loading}>
+    <div className="card">
+      <img src={user?.avatar ?? '/placeholder.png'} alt="Avatar" />
+      <h3>{user?.name ?? 'Placeholder Name'}</h3>
+      <p>{user?.bio ?? 'A line of text about as long as a real bio.'}</p>
+      <button>Follow</button>
+    </div>
+  </AutoSkeleton>
+);
+```
+
+> [!TIP]
+> **The one rule: AutoSkeleton measures what is rendered.** While loading, give your component
+> realistic **placeholder data**. An empty `<h3></h3>` or an image without a `src` has no size,
+> so there is nothing to measure.
+
+## 📚 Recipes
+
+### Lists and data fetching (the template pattern)
+
+You usually start with no data. Render a few "template" items while loading. AutoSkeleton measures them, draws the skeleton, then crossfades to the real items.
 
 ```tsx
 import { AutoSkeleton } from 'smart-skeleton-loader';
@@ -65,7 +109,7 @@ const TEMPLATE_USERS = Array.from({ length: 3 }, (_, i) => ({
 }));
 
 const UserList = () => {
-  const { data, isLoading } = useFetchUsers();
+  const { data, isLoading } = useFetchUsers(); // TanStack Query, SWR, RTK Query, fetch…
   const users = isLoading ? TEMPLATE_USERS : data;
 
   return (
@@ -80,107 +124,155 @@ const UserList = () => {
 };
 ```
 
-### 2. A single component
+### Cards and containers
 
-Give each field a placeholder fallback so it has a size while `user` is still `null`.
+AutoSkeleton tells **content** apart from **containers**:
+
+- **Content** (text, images, inputs, buttons) becomes **animated bars**, one per text line.
+- **Containers** (elements with a visible `border`, `background-color` or `box-shadow`) render as a **static clone** with your exact styles, without animation.
+
+So a card still looks like a card while its content pulses inside it.
+
+### Charts, maps and decorations
 
 ```tsx
-const UserProfile = ({ loading, user }) => (
-  <AutoSkeleton loading={loading}>
-    <div className="card">
-      <img src={user?.avatar ?? '/placeholder.png'} alt="Avatar" />
-      <h3>{user?.name ?? 'Placeholder Name'}</h3>
-      <p>{user?.bio ?? 'A line of text about as long as a real bio.'}</p>
-      <button>Follow</button>
-    </div>
-  </AutoSkeleton>
-);
+<div data-skeleton-block>
+  <Chart data={data} /> {/* one solid block, children skipped */}
+</div>
+
+<span data-skeleton-ignore>NEW</span> {/* no skeleton at all */}
 ```
 
-### 3. Container Detection (Cards)
-
-`smart-skeleton-loader` intelligently distinguishes between **Content** and **Containers**.
-
-- **Content** (Text, Images, Buttons) -> Renders as **animated bars** (one per text line).
-- **Containers** (Elements with visible `border`, `background-color`, or `box-shadow`) -> Renders as a **Static Clone** (with your exact styles) and **NO** pulse.
-
-This means a "Card" looks like a card (white background, shadow), and the content inside it pulses.
-
-## ⚙️ Configuration
-
-Customize the appearance via the `config` prop:
+### Theming
 
 ```tsx
 <AutoSkeleton
-  loading={true}
+  loading={isLoading}
   config={{
-    color: '#e0e0e0', // Base color of the skeleton pulse
-    highlightColor: '#f5f5f5', // Shine color
-    borderRadius: '8px', // Global border radius (auto-detects if not set)
+    animation: 'shimmer',
+    theme: 'auto', // follows the OS color scheme live
+    lightColor: '#e5e7eb',
+    darkColor: '#1f2937',
+    borderRadius: '8px',
   }}
 >
   <MyComponent />
 </AutoSkeleton>
 ```
 
-## 🧩 API Reference
+Prefer CSS? Set `--auto-skeleton-color` and `--auto-skeleton-highlight` globally, or import the optional `smart-skeleton-loader/styles.css` (supports a `.dark` class).
+
+### Hand-placed skeletons
+
+Need a one-off placeholder outside AutoSkeleton? The same building block is exported:
+
+```tsx
+import { SkeletonPrimitive } from 'smart-skeleton-loader';
+
+<SkeletonPrimitive width={120} height={16} animation="shimmer" />;
+```
+
+## 🧩 API reference
+
+### `<AutoSkeleton>` props
 
 | Prop           | Type            | Default      | Description                                                                                                                                   |
 | -------------- | --------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `loading`      | `boolean`       | _required_   | Whether to show the skeleton or the actual content.                                                                                           |
 | `children`     | `ReactNode`     | -            | The content to measure.                                                                                                                       |
-| `config`       | `object`        | -            | Customization options.                                                                                                                        |
+| `config`       | `object`        | -            | Appearance options (see below).                                                                                                               |
 | `loadingLabel` | `string`        | `"Loading…"` | Text announced to screen readers while loading.                                                                                               |
 | `className`    | `string`        | -            | Class name for the outer wrapper.                                                                                                             |
 | `style`        | `CSSProperties` | -            | Style for the outer wrapper, merged over `position: relative; display: block`.                                                                |
 | `delay`        | `number`        | `150`        | When `loading` turns on after mount, wait this long (ms) before showing the skeleton, so fast refetches never flash it. Not applied on mount. |
 | `minDuration`  | `number`        | `400`        | Once shown, keep the skeleton at least this long (ms).                                                                                        |
 
-### Config Object
+### `config`
 
 | Key                                  | Type                             | Default   | Description                                                                                       |
 | ------------------------------------ | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
 | `color`                              | `string`                         | `#e0e0e0` | Background color of primitives.                                                                   |
 | `highlightColor`                     | `string`                         | `#f2f2f2` | Animation highlight color.                                                                        |
-| `borderRadius`                       | `string`                         | `4px`     | Fallback radius (Auto-detection is attempted first).                                              |
+| `borderRadius`                       | `string \| number`               | `4px`     | Fallback radius (auto-detected from your elements first).                                         |
 | `theme`                              | `'light' \| 'dark' \| 'auto'`    | `'auto'`  | Force a theme, or follow the OS color scheme.                                                     |
 | `animation`                          | `'pulse' \| 'shimmer' \| 'none'` | `'pulse'` | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.      |
 | `lightColor` / `lightHighlightColor` | `string`                         | -         | Colors used when the (resolved) theme is light.                                                   |
 | `darkColor` / `darkHighlightColor`   | `string`                         | -         | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme. |
 
-### Per-element overrides
+### Per-element attributes
 
 | Attribute              | Effect                                                                                    |
 | ---------------------- | ----------------------------------------------------------------------------------------- |
 | `data-skeleton-ignore` | No skeleton for this element or anything inside it (e.g. decorative badges).              |
 | `data-skeleton-block`  | Draw the element as one block and skip its children (e.g. charts, maps, complex widgets). |
 
-```tsx
-<div data-skeleton-block>
-  <Chart data={data} />
-</div>
-```
+## 🛠 How it works
 
-## 🛠 How It Works
+1. **Invisible render.** While `loading`, your children render normally but with `opacity: 0`, so they take up real space.
+2. **Smart scan.** A `TreeWalker` walks the DOM:
+   - text becomes **one bar per rendered line**,
+   - images, inputs and buttons become **primitive skeletons**,
+   - styled containers become **container skeletons**.
+3. **Overlay.** Absolutely positioned skeletons are drawn exactly over the measured elements.
+4. **Crossfade.** When `loading` turns `false`, the content is already in place, so the skeleton fades out with zero layout shift.
 
-1.  **Invisible Measurement**: When `loading={true}`, your children are rendered in the DOM but hidden using `opacity: 0`. This allows them to take up space and be measured by the browser.
-2.  **Smart Scan**: We use a `TreeWalker` to scan the DOM elements.
-    - If it finds text -> It creates **one bar per rendered line** (the last bar is as short as the last line).
-    - If it finds images/inputs/buttons -> It creates a **Primitive Skeleton**.
-    - If it finds a styled container -> It creates a **Container Skeleton**.
-3.  **Overlay**: We render absolute positioned `divs` exactly over the measured elements.
-4.  **No Shift**: Because the hidden content is already holding the space, when `loading` becomes `false`, the skeleton and content crossfade. No jumping content!
+## ❓ FAQ
 
-## ⚠️ Notes
+<details>
+<summary><b>Does it work with Next.js App Router and Server Components?</b></summary>
 
-- **Accessibility:** while `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region.
-- **Avoiding flicker:** by default a refetch faster than 150ms changes nothing on screen (the current content stays, non-interactive), and a skeleton that does appear stays at least 400ms, then crossfades over 200ms. On mount the skeleton shows immediately. Pass `delay={0} minDuration={0}` for the old instant behaviour.
-- **Server rendering / Next.js:** the package is marked `'use client'`, so it can be imported from Server Components. Server-rendered HTML shows one pulsing block over the reserved space until hydration, then switches to measured skeletons.
-- **Default colors:** light `#e0e0e0`/`#f2f2f2`, dark `#2a2a2a`/`#3d3d3d`, chosen by OS scheme or `theme`, with no CSS import needed. `styles.css` is optional: import it, or set `--auto-skeleton-color` / `--auto-skeleton-highlight` yourself, to theme globally (it also supports a `.dark` class).
-- **Layout:** the wrapper is `display: block`, so it fills its parent like the content it replaces. For inline content pass `style={{ display: 'inline-block' }}`.
-- **Placeholders**: For images, ensure you provide a `src` (even a placeholder) or explicit `width/height` style so the image takes up space to be measured.
-- **Opacity vs Visibility**: We use `opacity: 0` to hide content. This ensures that even elements that might behave strangely with `visibility: hidden` are correctly measured.
+Yes. The package is marked `'use client'`, so you can import it directly from a Server Component. Server-rendered HTML shows one pulsing block over the reserved space until hydration, then switches to measured skeletons.
+
+</details>
+
+<details>
+<summary><b>Will it flash a skeleton on every quick refetch?</b></summary>
+
+No. By default a refetch faster than 150 ms changes nothing on screen (the current content stays, non-interactive), and a skeleton that does appear stays at least 400 ms, then crossfades over 200 ms. On first mount the skeleton shows immediately. Pass `delay={0} minDuration={0}` for instant behaviour.
+
+</details>
+
+<details>
+<summary><b>Is it accessible?</b></summary>
+
+While `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region. Animations are disabled under `prefers-reduced-motion`.
+
+</details>
+
+<details>
+<summary><b>Do I need to import a stylesheet?</b></summary>
+
+No. Default colors (light `#e0e0e0` / `#f2f2f2`, dark `#2a2a2a` / `#3d3d3d`) are built in. `styles.css` is optional, for global theming via CSS variables.
+
+</details>
+
+<details>
+<summary><b>My skeleton is missing for some elements. Why?</b></summary>
+
+Elements with no size can't be measured. Make sure text has placeholder content and images have a `src` (even a placeholder) or an explicit `width`/`height`.
+
+</details>
+
+<details>
+<summary><b>The wrapper breaks my inline layout.</b></summary>
+
+The wrapper is `display: block` so it fills its parent like the content it replaces. For inline content pass `style={{ display: 'inline-block' }}`.
+
+</details>
+
+## 🤝 Contributing
+
+Bug reports, ideas and pull requests are welcome! Open an [issue](https://github.com/DashnyamB/smart-skeleton-loader/issues) or start a PR.
+
+## 💖 Support
+
+If `smart-skeleton-loader` saved you from writing yet another skeleton component, you can help it grow:
+
+- ⭐ **[Star the repo on GitHub](https://github.com/DashnyamB/smart-skeleton-loader)** so more developers find it
+- ☕ **[Buy me a coffee](https://buymeacoffee.com/dashnyamkkq)** to support further development
+
+<a href="https://buymeacoffee.com/dashnyamkkq"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="48"></a>
 
 ## License
 
-MIT © 2026
+MIT © 2026 [dashnyamb](https://github.com/DashnyamB)

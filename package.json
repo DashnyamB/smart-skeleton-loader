@@ -50,16 +50,28 @@
   },
   "author": "dashnyamb",
   "license": "MIT",
-  "description": "Zero-dependency React skeleton loader that measures your real components and draws matching skeletons automatically.",
+  "description": "Automatic React skeleton loader: wrap any component and get a pixel-perfect loading skeleton measured from its real layout. Zero dependencies, ~4.5 kB, Next.js ready.",
   "keywords": [
     "react",
     "skeleton",
     "skeleton-loader",
+    "skeleton-screen",
+    "react-skeleton",
+    "auto-skeleton",
     "loading",
+    "loader",
+    "loading-state",
     "placeholder",
+    "content-placeholder",
     "shimmer",
+    "suspense",
+    "layout-shift",
+    "cls",
+    "accessibility",
+    "dark-mode",
     "react19",
-    "nextjs"
+    "nextjs",
+    "typescript"
   ],
   "peerDependencies": {
     "react": "^19.0.0"
