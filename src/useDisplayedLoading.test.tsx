@@ -102,6 +102,29 @@ describe('AutoSkeleton reveal timing', () => {
     expect(screen.queryByTestId('skeleton-overlay')).toBeNull();
   });
 
+  it('keeps already-revealed content on screen during a refetch delay', () => {
+    const refetch = (loading: boolean) => (
+      <AutoSkeleton loading={loading} delay={150}>
+        <div data-testid="content">Content</div>
+      </AutoSkeleton>
+    );
+    const { rerender } = render(refetch(false));
+    const content = screen.getByTestId('content').parentElement!;
+
+    rerender(refetch(true));
+    expect(content).toHaveStyle({ opacity: '1' });
+    expect(content).toHaveAttribute('inert');
+    advance(100);
+    rerender(refetch(false)); // fast refetch: nothing visible ever changed
+    expect(content).toHaveStyle({ opacity: '1' });
+    expect(screen.queryByTestId('skeleton-overlay')).toBeNull();
+
+    rerender(refetch(true));
+    advance(150); // slow refetch: skeleton takes over, content hidden instantly
+    expect(screen.getByTestId('skeleton-overlay')).toBeInTheDocument();
+    expect(content).toHaveStyle({ opacity: '0', transition: 'none' });
+  });
+
   it('keeps content hidden during `delay` without showing a skeleton', () => {
     render(
       <AutoSkeleton loading delay={150}>

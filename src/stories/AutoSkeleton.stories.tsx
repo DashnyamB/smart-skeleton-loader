@@ -606,9 +606,26 @@ export const RevealTiming: StoryObj<{ delay: number; minDuration: number }> = {
     const overlay = (id: string) =>
       within(canvas.getByTestId(id)).queryByTestId('skeleton-overlay');
 
+    const tunedContent = canvas
+      .getByTestId('tuned')
+      .querySelector('[aria-busy]')!.children[1] as HTMLElement;
+
     await userEvent.click(canvas.getByRole('button', { name: /fast load/i }));
     // Naive flashes a skeleton; tuned stays quiet during its delay
     await expect(overlay('naive')).not.toBeNull();
     await expect(overlay('tuned')).toBeNull();
+
+    // Sample every frame until the fast load is over: the tuned card never dims
+    let minOpacity = 1;
+    const start = performance.now();
+    while (performance.now() - start < 400) {
+      await new Promise(requestAnimationFrame);
+      minOpacity = Math.min(
+        minOpacity,
+        +getComputedStyle(tunedContent).opacity,
+      );
+      await expect(overlay('tuned')).toBeNull();
+    }
+    await expect(minOpacity).toBe(1);
   },
 };

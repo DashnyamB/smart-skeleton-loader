@@ -1,4 +1,10 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, {
+  ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { getTextLineBoxes } from './measure';
 import { SkeletonPrimitive } from './SkeletonPrimitive';
@@ -62,6 +68,13 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   const showSkeleton = useDisplayedLoading(loading, { delay, minDuration });
   // Content stays hidden while data is missing or the skeleton is still held on screen
   const busy = loading || showSkeleton;
+
+  // Once real content has been shown, a refetch keeps it on screen during `delay`
+  // (so fast refetches change nothing visually). Before that, there is only
+  // placeholder content, which must stay hidden.
+  const [revealed, setRevealed] = useState(!busy);
+  if (!busy && !revealed) setRevealed(true);
+  const hidden = showSkeleton || (loading && !revealed);
 
   // Keep the overlay mounted while it fades out (set-state-during-render avoids a blank frame)
   const [fadingOut, setFadingOut] = useState(false);
@@ -248,7 +261,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
     setSkeletons(newSkeletons);
   };
 
-  useEffect(() => {
+  // Layout effect: measure before paint so the overlay never shows a frame without bars
+  useLayoutEffect(() => {
     if (!containerRef.current) return;
 
     // Initial measure
@@ -320,10 +334,11 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
       <div
         ref={containerRef}
         style={{
-          opacity: busy ? 0 : 1,
-          transition: `opacity ${FADE_MS}ms ease`,
+          opacity: hidden ? 0 : 1,
+          // Hide instantly (no ghost content under the bars); fade only on reveal
+          transition: hidden ? 'none' : `opacity ${FADE_MS}ms ease`,
         }}
-        aria-hidden={busy}
+        aria-hidden={hidden}
         inert={busy}
       >
         {children}
