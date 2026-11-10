@@ -1,0 +1,150 @@
+import type React from 'react';
+
+import { getTextLineBoxes } from './measure';
+
+/** Text bars are drawn at this fraction of the line box height, vertically centered. */
+const TEXT_BAR_RATIO = 0.7;
+
+const ATOMIC_TAGS = new Set(['IMG', 'INPUT', 'BUTTON', 'TEXTAREA', 'SELECT']);
+const TRANSPARENT = new Set(['rgba(0, 0, 0, 0)', 'transparent']);
+
+export interface SkeletonBox {
+  key: string;
+  type: 'primitive' | 'container';
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  borderRadius: string;
+  style?: React.CSSProperties;
+}
+
+type Kind =
+  | { type: 'primitive'; text: boolean }
+  | { type: 'container'; styles: React.CSSProperties };
+
+const hasOwnText = (el: Element) =>
+  Array.from(el.childNodes).some(
+    (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
+  );
+
+/** Classifies an element from one computed-style read. */
+function classify(el: Element, style: CSSStyleDeclaration): Kind | null {
+  if (ATOMIC_TAGS.has(el.tagName)) return { type: 'primitive', text: false };
+  if (hasOwnText(el)) return { type: 'primitive', text: true };
+
+  const hasBackground = !TRANSPARENT.has(style.backgroundColor);
+  const hasBorder =
+    style.borderWidth !== '0px' &&
+    style.borderStyle !== 'none' &&
+    !TRANSPARENT.has(style.borderColor);
+  const hasShadow = style.boxShadow !== 'none';
+  if (!hasBackground && !hasBorder && !hasShadow) return null;
+
+  return {
+    type: 'container',
+    styles: {
+      backgroundColor: style.backgroundColor,
+      border: style.border,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+    },
+  };
+}
+
+const toCss = (r: string | number | undefined) =>
+  typeof r === 'number' ? `${r}px` : r;
+
+/**
+ * Walks `container` and returns the skeleton boxes to draw, relative to it.
+ * Reads each element's computed style exactly once.
+ */
+export function scanSkeletons(
+  container: HTMLElement,
+  borderRadius?: string | number,
+): SkeletonBox[] {
+  const origin = container.getBoundingClientRect();
+  const radiusOverride = toCss(borderRadius);
+  const boxes: SkeletonBox[] = [];
+  let idx = 0;
+
+  const visit = (el: Element) => {
+    const style = window.getComputedStyle(el);
+    if (style.display === 'none') return;
+
+    const kind = classify(el, style);
+    if (kind?.type === 'primitive' && kind.text) {
+      const lines = getTextLineBoxes(el);
+      for (const line of lines) {
+        const height = Math.max(4, line.height * TEXT_BAR_RATIO);
+        boxes.push({
+          key: `${idx++}`,
+          type: 'primitive',
+          width: line.width,
+          height,
+          top: line.top + (line.height - height) / 2 - origin.top,
+          left: line.left - origin.left,
+          borderRadius: radiusOverride ?? '4px',
+        });
+      }
+      if (lines.length > 0) {
+        for (const child of Array.from(el.children)) visit(child);
+        return;
+      }
+    }
+
+    if (kind) {
+      const rect = el.getBoundingClientRect();
+      let radius =
+        radiusOverride ??
+        (kind.type === 'container' ? kind.styles.borderRadius : undefined) ??
+        style.borderRadius;
+      if (kind.type === 'primitive' && (!radius || radius === '0px')) {
+        radius = el.tagName === 'BUTTON' ? '6px' : '4px';
+      }
+      boxes.push({
+        key: `${idx++}`,
+        type: kind.type,
+        width: rect.width,
+        height: rect.height,
+        top: rect.top - origin.top,
+        left: rect.left - origin.left,
+        borderRadius: String(radius),
+        style: kind.type === 'container' ? kind.styles : undefined,
+      });
+    }
+
+    for (const child of Array.from(el.children)) visit(child);
+  };
+
+  for (const child of Array.from(container.children)) visit(child);
+
+  if (boxes.length === 0 && (origin.width > 0 || origin.height > 0)) {
+    boxes.push({
+      key: 'fallback',
+      type: 'primitive',
+      width: origin.width,
+      height: origin.height,
+      top: 0,
+      left: 0,
+      borderRadius: radiusOverride ?? '4px',
+    });
+  }
+  return boxes;
+}
+
+/** True when two scans would render identically (skip a re-render). */
+export function sameBoxes(a: SkeletonBox[], b: SkeletonBox[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((x, i) => {
+    const y = b[i];
+    return (
+      x.type === y.type &&
+      x.width === y.width &&
+      x.height === y.height &&
+      x.top === y.top &&
+      x.left === y.left &&
+      x.borderRadius === y.borderRadius
+    );
+  });
+}
