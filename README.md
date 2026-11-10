@@ -50,7 +50,8 @@ Hand-written skeletons are a second copy of your UI. Every time a card gets a ne
 - 🧘 **Zero layout shift.** The real content holds its space the whole time, then crossfades in. Your CLS score will thank you.
 - ⏱️ **No flicker, ever.** Fast refetches never flash a skeleton (`delay`), and a skeleton that does appear never blinks away (`minDuration`).
 - ♿ **Accessible by default.** Hidden content is `inert`, the wrapper is `aria-busy`, and loading is announced to screen readers.
-- 🌗 **Light, dark and auto themes.** Follows the OS color scheme live, or force a theme. Pulse, shimmer or static animation, and `prefers-reduced-motion` is respected.
+- 🎨 **Matches your theme automatically.** Bars are tinted from the text color of the surface they sit on, so light pages, dark sidebars, brand-colored cards and custom themes all look right with zero config, and a theme switch mid-load re-tints them.
+- 🌗 **Pulse, shimmer or static.** `prefers-reduced-motion` is respected; fixed light/dark palettes are available too.
 - ⚡ **Next.js & SSR friendly.** Ships with `'use client'`, works from Server Components, and shows a placeholder before hydration.
 - 🪶 **Tiny and dependency-free.** ~4.5 kB gzipped, nothing but `react` as a peer. No CSS import required.
 
@@ -145,6 +146,16 @@ So a card still looks like a card while its content pulses inside it.
 
 ### Theming
 
+**Adaptive color (default).** With no color configured, each bar is the text color of the surface it sits on at 12% opacity. A dark sidebar inside a light page gets light bars; a blue card gets bluish bars. Everything on one surface gets the same tint, so skeletons stay consistent across the app. Tune the strength with a CSS variable:
+
+```css
+:root {
+  --auto-skeleton-strength: 16%; /* default 12% */
+}
+```
+
+**Fixed colors.** Explicit colors always win over adaptive ones:
+
 ```tsx
 <AutoSkeleton
   loading={isLoading}
@@ -160,7 +171,9 @@ So a card still looks like a card while its content pulses inside it.
 </AutoSkeleton>
 ```
 
-Prefer CSS? Set `--auto-skeleton-color` and `--auto-skeleton-highlight` globally, or import the optional `smart-skeleton-loader/styles.css` (supports a `.dark` class).
+Prefer CSS? Set `--auto-skeleton-color` and `--auto-skeleton-highlight` globally, or import the optional `smart-skeleton-loader/styles.css` (supports a `.dark` class). Either one replaces adaptive color.
+
+Color precedence: `color` props › `--auto-skeleton-color` CSS variable › adaptive. `config.color: 'static'` or an explicit `theme: 'light' | 'dark'` uses the fixed greys instead.
 
 ### Hand-placed skeletons
 
@@ -189,15 +202,15 @@ import { SkeletonPrimitive } from 'smart-skeleton-loader';
 
 ### `config`
 
-| Key                                  | Type                             | Default   | Description                                                                                       |
-| ------------------------------------ | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
-| `color`                              | `string`                         | `#e0e0e0` | Background color of primitives.                                                                   |
-| `highlightColor`                     | `string`                         | `#f2f2f2` | Animation highlight color.                                                                        |
-| `borderRadius`                       | `string \| number`               | `4px`     | Fallback radius (auto-detected from your elements first).                                         |
-| `theme`                              | `'light' \| 'dark' \| 'auto'`    | `'auto'`  | Force a theme, or follow the OS color scheme.                                                     |
-| `animation`                          | `'pulse' \| 'shimmer' \| 'none'` | `'pulse'` | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.      |
-| `lightColor` / `lightHighlightColor` | `string`                         | -         | Colors used when the (resolved) theme is light.                                                   |
-| `darkColor` / `darkHighlightColor`   | `string`                         | -         | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme. |
+| Key                                  | Type                               | Default      | Description                                                                                                   |
+| ------------------------------------ | ---------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------- |
+| `color`                              | `'adaptive' \| 'static' \| string` | `'adaptive'` | `'adaptive'` tints from the surrounding text color, `'static'` uses fixed light/dark greys, or any CSS color. |
+| `highlightColor`                     | `string`                           | `#f2f2f2`    | Animation highlight color.                                                                                    |
+| `borderRadius`                       | `string \| number`                 | `4px`        | Fallback radius (auto-detected from your elements first).                                                     |
+| `theme`                              | `'light' \| 'dark' \| 'auto'`      | `'auto'`     | `'light'`/`'dark'` force the fixed palette for that theme. Not needed with adaptive color.                    |
+| `animation`                          | `'pulse' \| 'shimmer' \| 'none'`   | `'pulse'`    | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.                  |
+| `lightColor` / `lightHighlightColor` | `string`                           | -            | Colors used when the (resolved) theme is light.                                                               |
+| `darkColor` / `darkHighlightColor`   | `string`                           | -            | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme.             |
 
 ### Per-element attributes
 
@@ -242,7 +255,14 @@ While `loading`, the real content is `inert` (no clicks, no Tab focus, hidden fr
 <details>
 <summary><b>Do I need to import a stylesheet?</b></summary>
 
-No. Default colors (light `#e0e0e0` / `#f2f2f2`, dark `#2a2a2a` / `#3d3d3d`) are built in. `styles.css` is optional, for global theming via CSS variables.
+No. Skeletons tint themselves from your UI (adaptive color), and fixed greys (light `#e0e0e0` / `#f2f2f2`, dark `#2a2a2a` / `#3d3d3d`) are built in for `color: 'static'`. `styles.css` is optional, for global theming via CSS variables.
+
+</details>
+
+<details>
+<summary><b>My skeletons changed color after upgrading.</b></summary>
+
+Since 2.3, skeletons use adaptive color by default instead of a fixed grey. To restore the old look, pass `config={{ color: 'static' }}`, or set `--auto-skeleton-color` / import `styles.css`. Adaptive color uses CSS `color-mix()` (Chrome 111+, Safari 16.2+, Firefox 113+).
 
 </details>
 

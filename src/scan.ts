@@ -17,6 +17,8 @@ export interface SkeletonBox {
   left: number;
   borderRadius: string;
   style?: React.CSSProperties;
+  /** Text color of the surface the bar sits on; adaptive bars are tinted from it. */
+  ink?: string;
 }
 
 type Kind =
@@ -52,6 +54,18 @@ function classify(el: Element, style: CSSStyleDeclaration): Kind | null {
   };
 }
 
+/** True for a computed background color that fully covers what is behind it. */
+export function isOpaque(color: string): boolean {
+  if (TRANSPARENT.has(color)) return false;
+  // rgba(r, g, b, a) / rgb(r g b / a) / color(srgb r g b / a)
+  const alpha = /(?:,|\/)\s*([\d.]+%?)\s*\)$/.exec(color);
+  if (!alpha || (color.startsWith('rgb(') && !color.includes('/'))) return true;
+  const a = alpha[1].endsWith('%')
+    ? parseFloat(alpha[1]) / 100
+    : parseFloat(alpha[1]);
+  return a >= 1;
+}
+
 const toCss = (r: string | number | undefined) =>
   typeof r === 'number' ? `${r}px` : r;
 
@@ -71,13 +85,17 @@ export function scanSkeletons(
   const radiusOverride = toCss(borderRadius);
   const boxes: SkeletonBox[] = [];
   let idx = 0;
+  // The content's own text color is the ink of the outermost surface
+  const rootInk = window.getComputedStyle(container).color || undefined;
 
-  const visit = (el: Element) => {
+  const visit = (el: Element, ink: string | undefined) => {
     // Opt-out: no skeleton for this element or anything inside it
     if (el.hasAttribute('data-skeleton-ignore')) return;
 
     const style = window.getComputedStyle(el);
     if (style.display === 'none') return;
+    // An opaque background starts a new surface: its text color tints the bars inside it
+    const childInk = isOpaque(style.backgroundColor) ? style.color || ink : ink;
 
     // Opt-in: draw the whole element as one block, skip its children
     if (el.hasAttribute('data-skeleton-block')) {
@@ -94,6 +112,7 @@ export function scanSkeletons(
           (style.borderRadius && style.borderRadius !== '0px'
             ? style.borderRadius
             : '4px'),
+        ink,
       });
       return;
     }
@@ -111,10 +130,11 @@ export function scanSkeletons(
           top: line.top + (line.height - height) / 2 - origin.top,
           left: line.left - origin.left,
           borderRadius: radiusOverride ?? '4px',
+          ink,
         });
       }
       if (lines.length > 0) {
-        for (const child of Array.from(el.children)) visit(child);
+        for (const child of Array.from(el.children)) visit(child, childInk);
         return;
       }
     }
@@ -137,13 +157,14 @@ export function scanSkeletons(
         left: rect.left - origin.left,
         borderRadius: String(radius),
         style: kind.type === 'container' ? kind.styles : undefined,
+        ink,
       });
     }
 
-    for (const child of Array.from(el.children)) visit(child);
+    for (const child of Array.from(el.children)) visit(child, childInk);
   };
 
-  for (const child of Array.from(container.children)) visit(child);
+  for (const child of Array.from(container.children)) visit(child, rootInk);
 
   if (boxes.length === 0 && (origin.width > 0 || origin.height > 0)) {
     boxes.push({
@@ -154,6 +175,7 @@ export function scanSkeletons(
       top: 0,
       left: 0,
       borderRadius: radiusOverride ?? '4px',
+      ink: rootInk,
     });
   }
   return boxes;
@@ -170,7 +192,8 @@ export function sameBoxes(a: SkeletonBox[], b: SkeletonBox[]): boolean {
       x.height === y.height &&
       x.top === y.top &&
       x.left === y.left &&
-      x.borderRadius === y.borderRadius
+      x.borderRadius === y.borderRadius &&
+      x.ink === y.ink
     );
   });
 }

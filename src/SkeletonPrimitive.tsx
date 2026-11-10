@@ -10,6 +10,13 @@ export interface SkeletonPrimitiveProps extends React.HTMLAttributes<HTMLDivElem
   highlightColor?: string;
   /** `pulse` (default) fades the color, `shimmer` sweeps a highlight, `none` is static. */
   animation?: SkeletonAnimation;
+  /**
+   * Tint the bar from the text color around it (default), so it matches any
+   * theme or surface. `false` uses the static light/dark greys.
+   */
+  adaptive?: boolean;
+  /** Text color to tint from when adaptive; defaults to the inherited `currentColor`. */
+  ink?: string;
 }
 
 /** Built-in defaults: used when no --auto-skeleton-* variable or color prop is set. */
@@ -28,6 +35,12 @@ const SKELETON_CSS = `
 }
 [data-skeleton-theme='light'] .auto-skeleton { ${vars(DEFAULT_COLORS.light)} }
 [data-skeleton-theme='dark'] .auto-skeleton { ${vars(DEFAULT_COLORS.dark)} }
+
+/* Adaptive: the surface's text color at low alpha, so the bar takes on any background */
+.auto-skeleton.auto-skeleton--adaptive {
+  --auto-skeleton-default-c: color-mix(in srgb, var(--auto-skeleton-ink, currentColor) var(--auto-skeleton-strength, 12%), transparent);
+  --auto-skeleton-default-h: color-mix(in srgb, var(--auto-skeleton-ink, currentColor) calc(var(--auto-skeleton-strength, 12%) * 1.7), transparent);
+}
 
 @keyframes auto-skeleton-pulse {
   0%, 100% { background-color: var(--auto-skeleton-c); }
@@ -56,11 +69,14 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
   color = 'var(--auto-skeleton-color, var(--auto-skeleton-default-c))',
   highlightColor = 'var(--auto-skeleton-highlight, var(--auto-skeleton-default-h))',
   animation = 'pulse',
+  adaptive = true,
+  ink,
   className,
   style,
   ...props
 }) => {
   const classes = ['auto-skeleton'];
+  if (adaptive) classes.push('auto-skeleton--adaptive');
   if (animation !== 'none') classes.push(`auto-skeleton--${animation}`);
   if (className) classes.push(className);
 
@@ -80,6 +96,7 @@ export const SkeletonPrimitive: React.FC<SkeletonPrimitiveProps> = ({
             backgroundColor: color,
             '--auto-skeleton-c': color,
             '--auto-skeleton-h': highlightColor,
+            ...(adaptive && ink ? { '--auto-skeleton-ink': ink } : {}),
             ...style,
           } as React.CSSProperties
         }

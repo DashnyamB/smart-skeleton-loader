@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
 import { renderToString } from 'react-dom/server';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { AutoSkeleton } from '../AutoSkeleton';
 
@@ -842,5 +842,118 @@ export const ElementOverrides: Story = {
 
     await expect(bars.filter((r) => inside(r, chart))).toHaveLength(1);
     await expect(bars.filter((r) => inside(r, badge))).toHaveLength(0);
+  },
+};
+
+// Adaptive color: bars take their tint from the surface they sit on
+const SURFACES = [
+  {
+    id: 'page',
+    label: 'Page (follows the toggle)',
+    bg: '#ffffff',
+    fg: '#1f2328',
+  },
+  { id: 'sidebar', label: 'Dark sidebar', bg: '#0f172a', fg: '#e2e8f0' },
+  { id: 'brand', label: 'Brand card', bg: '#1d4ed8', fg: '#eff6ff' },
+  { id: 'sepia', label: 'Sepia theme', bg: '#f4ecd8', fg: '#5b4636' },
+] as const;
+
+const ProfileRow = () => (
+  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+    <img
+      src={AVATAR_PLACEHOLDER}
+      alt=""
+      width={40}
+      height={40}
+      style={{ borderRadius: '50%' }}
+    />
+    <div>
+      <strong style={{ display: 'block' }}>Ada Lovelace</strong>
+      <span>Analytical Engine team</span>
+    </div>
+  </div>
+);
+
+/** Rough 0–1 lightness of a computed color (Chrome reports animated colors in oklab). */
+const lightness = (color: string) => {
+  const nums = (color.match(/-?[\d.]+/g) ?? []).map(Number);
+  if (color.startsWith('ok')) return nums[0]; // oklab()/oklch(): L is first
+  const rgb = color.startsWith('color(')
+    ? nums.slice(0, 3)
+    : nums.slice(0, 3).map((n) => n / 255);
+  return (rgb[0] + rgb[1] + rgb[2]) / 3;
+};
+
+export const AdaptiveColor: Story = {
+  args: { loading: true, children: null },
+  parameters: { layout: 'padded' },
+  render: function Render() {
+    const [dark, setDark] = useState(false);
+    return (
+      <div
+        data-testid="adaptive-root"
+        style={{
+          padding: 16,
+          background: dark ? '#111' : '#fafafa',
+          color: dark ? '#eee' : '#222',
+          font: '14px sans-serif',
+        }}
+      >
+        <button type="button" onClick={() => setDark((d) => !d)}>
+          Toggle page theme
+        </button>
+        <p style={{ color: 'inherit', opacity: 0.7 }}>
+          No colors configured: every skeleton tints itself from its surface.
+        </p>
+        <div
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}
+        >
+          {SURFACES.map((s) => (
+            <div
+              key={s.id}
+              data-testid={`surface-${s.id}`}
+              style={
+                s.id === 'page'
+                  ? { padding: 16 } // inherits the page itself
+                  : {
+                      padding: 16,
+                      borderRadius: 8,
+                      background: s.bg,
+                      color: s.fg,
+                    }
+              }
+            >
+              <p style={{ margin: '0 0 8px', fontSize: 12 }}>{s.label}</p>
+              <AutoSkeleton loading>
+                <ProfileRow />
+              </AutoSkeleton>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const barColor = (id: string) =>
+      getComputedStyle(
+        within(canvas.getByTestId(`surface-${id}`)).getAllByTestId(
+          'skeleton',
+        )[0],
+      ).backgroundColor;
+
+    // Dark surfaces get light ink, light surfaces get dark ink
+    await expect(lightness(barColor('sidebar'))).toBeGreaterThan(0.5);
+    await expect(lightness(barColor('brand'))).toBeGreaterThan(0.5);
+    await expect(lightness(barColor('sepia'))).toBeLessThan(0.5);
+    await expect(lightness(barColor('page'))).toBeLessThan(0.5);
+
+    // Switching the page theme mid-load re-tints the bars on the page surface
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Toggle page theme' }),
+    );
+    await waitFor(() =>
+      expect(lightness(barColor('page'))).toBeGreaterThan(0.5),
+    );
   },
 };
