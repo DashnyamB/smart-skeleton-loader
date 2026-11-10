@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { AutoSkeleton } from '../AutoSkeleton';
+
 import '../styles.css'; // Import the default theme styles
 
 const meta = {

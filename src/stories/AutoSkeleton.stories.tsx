@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
+
 import { AutoSkeleton } from '../AutoSkeleton';
 
 const meta = {

@@ -2,6 +2,7 @@
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+
 import { AutoSkeleton } from './AutoSkeleton';
 
 expect.extend(matchers);
