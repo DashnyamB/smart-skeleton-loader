@@ -121,12 +121,14 @@ Customize the appearance via the `config` prop:
 
 ## 🧩 API Reference
 
-| Prop           | Type        | Default      | Description                                         |
-| -------------- | ----------- | ------------ | --------------------------------------------------- |
-| `loading`      | `boolean`   | `true`       | Whether to show the skeleton or the actual content. |
-| `children`     | `ReactNode` | -            | The content to measure.                             |
-| `config`       | `object`    | -            | Customization options.                              |
-| `loadingLabel` | `string`    | `"Loading…"` | Text announced to screen readers while loading.     |
+| Prop           | Type            | Default      | Description                                                                    |
+| -------------- | --------------- | ------------ | ------------------------------------------------------------------------------ |
+| `loading`      | `boolean`       | `true`       | Whether to show the skeleton or the actual content.                            |
+| `children`     | `ReactNode`     | -            | The content to measure.                                                        |
+| `config`       | `object`        | -            | Customization options.                                                         |
+| `loadingLabel` | `string`        | `"Loading…"` | Text announced to screen readers while loading.                                |
+| `className`    | `string`        | -            | Class name for the outer wrapper.                                              |
+| `style`        | `CSSProperties` | -            | Style for the outer wrapper, merged over `position: relative; display: block`. |
 
 ### Config Object
 
@@ -148,6 +150,7 @@ Customize the appearance via the `config` prop:
 ## ⚠️ Notes
 
 - **Accessibility:** while `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region.
+- **Layout:** the wrapper is `display: block`, so it fills its parent like the content it replaces. For inline content pass `style={{ display: 'inline-block' }}`.
 - **Placeholders**: For images, ensure you provide a `src` (even a placeholder) or explicit `width/height` style so the image takes up space to be measured.
 - **Opacity vs Visibility**: We use `opacity: 0` to hide content. This ensures that even elements that might behave strangely with `visibility: hidden` are correctly measured.
 

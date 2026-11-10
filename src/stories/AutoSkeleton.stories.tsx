@@ -441,3 +441,52 @@ export const Accessibility: Story = {
     );
   },
 };
+
+// Layout: the wrapper must not shrink full-width or flex children
+const ProfileCard = () => (
+  <div
+    data-testid="full-width-card"
+    style={{
+      padding: 16,
+      border: '1px solid #ddd',
+      borderRadius: 8,
+      fontFamily: 'sans-serif',
+    }}
+  >
+    <h4 style={{ margin: '0 0 8px' }}>Full-width card</h4>
+    <p style={{ margin: 0 }}>Stretches to its parent, like any block.</p>
+  </div>
+);
+
+export const FullWidthLayout: Story = {
+  args: { loading: true, children: null },
+  parameters: { layout: 'padded' },
+  render: (args) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div data-testid="block-parent" style={{ width: 600 }}>
+        <AutoSkeleton loading={args.loading}>
+          <ProfileCard />
+        </AutoSkeleton>
+      </div>
+      <div
+        data-testid="flex-parent"
+        style={{ display: 'flex', flexDirection: 'column', width: 400 }}
+      >
+        <AutoSkeleton loading={args.loading}>
+          <ProfileCard />
+        </AutoSkeleton>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const id of ['block-parent', 'flex-parent']) {
+      const parent = within(canvasElement).getByTestId(id);
+      const wrapper = parent.firstElementChild as HTMLElement;
+      const diff = Math.abs(
+        parent.getBoundingClientRect().width -
+          wrapper.getBoundingClientRect().width,
+      );
+      await expect(diff).toBeLessThanOrEqual(1);
+    }
+  },
+};
