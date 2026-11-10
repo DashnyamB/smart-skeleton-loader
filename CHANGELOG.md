@@ -1,3 +1,27 @@
+# [2.0.0](https://github.com/DashnyamB/smart-skeleton-loader/compare/v1.0.1...v2.0.0) (2026-11-10)
+
+
+* fix!: drop all runtime dependencies and fix package exports ([#20](https://github.com/DashnyamB/smart-skeleton-loader/issues/20)) ([5feccf1](https://github.com/DashnyamB/smart-skeleton-loader/commit/5feccf1aacef34756beaa9a57f14249d1867362d))
+
+
+### Bug Fixes
+
+* **deps:** update all dependencies to latest ([#17](https://github.com/DashnyamB/smart-skeleton-loader/issues/17)) ([cf538e7](https://github.com/DashnyamB/smart-skeleton-loader/commit/cf538e7cdac066dfb29168987de5f20984e853e5)), closes [#2](https://github.com/DashnyamB/smart-skeleton-loader/issues/2) [#3](https://github.com/DashnyamB/smart-skeleton-loader/issues/3) [#5](https://github.com/DashnyamB/smart-skeleton-loader/issues/5) [#6](https://github.com/DashnyamB/smart-skeleton-loader/issues/6) [#11](https://github.com/DashnyamB/smart-skeleton-loader/issues/11) [#12](https://github.com/DashnyamB/smart-skeleton-loader/issues/12) [#13](https://github.com/DashnyamB/smart-skeleton-loader/issues/13) [#14](https://github.com/DashnyamB/smart-skeleton-loader/issues/14) [#15](https://github.com/DashnyamB/smart-skeleton-loader/issues/15) [#18](https://github.com/DashnyamB/smart-skeleton-loader/issues/18) [#19](https://github.com/DashnyamB/smart-skeleton-loader/issues/19)
+* make hidden content inert and announce loading state ([#21](https://github.com/DashnyamB/smart-skeleton-loader/issues/21)) ([4bd1fc4](https://github.com/DashnyamB/smart-skeleton-loader/commit/4bd1fc4e088e6ae23137de8350f07b322f350c86))
+* render the wrapper as a block so it fills its parent ([#22](https://github.com/DashnyamB/smart-skeleton-loader/issues/22)) ([735f717](https://github.com/DashnyamB/smart-skeleton-loader/commit/735f71788c616a0ebd807a1cb9b79b76b81f302a))
+
+
+### Features
+
+* draw one skeleton bar per rendered text line ([#23](https://github.com/DashnyamB/smart-skeleton-loader/issues/23)) ([7094a05](https://github.com/DashnyamB/smart-skeleton-loader/commit/7094a057515b1b86248aa7b5176b52c90882ca06))
+
+
+### BREAKING CHANGES
+
+* SkeletonPrimitiveProps now extends
+React.HTMLAttributes<HTMLDivElement> instead of HTMLMotionProps<'div'>,
+and react >=19 is required as a peer dependency.
+
 ## [1.0.1](https://github.com/DashnyamB/smart-skeleton-loader/compare/v1.0.0...v1.0.1) (2026-02-03)
 
 
