@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.1.1...v2.1.2) (2026-11-10)
+
+
+### Bug Fixes
+
+* apply theme-specific colors when theme is auto ([#29](https://github.com/DashnyamB/smart-skeleton-loader/issues/29)) ([aca87fd](https://github.com/DashnyamB/smart-skeleton-loader/commit/aca87fd192a2032f76332ed3c0dc24fa69d44542))
+
 ## [2.1.1](https://github.com/DashnyamB/smart-skeleton-loader/compare/v2.1.0...v2.1.1) (2026-11-10)
 
 
