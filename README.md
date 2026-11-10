@@ -20,14 +20,16 @@
 
 ## ✨ Features
 
-- 📏 **Auto-Measurement**: Measures rendered elements to perfectly match dimensions.
+- 📏 **Auto-Measurement**: Measures your real rendered layout, so the skeleton always matches it.
 - 🧠 **Smart Detection**:
-  - **Text**: Detects text blocks and wraps them.
-  - **Content**: Automatically handles `<img>`, `<input>`, `<button>`, `<textarea>`.
-  - **Containers**: **NEW!** Detects cards and sections with borders/shadows and renders a static structural skeleton for them.
-- 🧘 **No Layout Shift**: Preserves the exact container space while loading to prevent CLS (Cumulative Layout Shift).
-- 🎨 **Customizable**: Control colors, border radius, and animations.
-- ♻️ **Template Pattern**: Use your actual components mock data to generate skeletons for data-fetching lists.
+  - **Text**: One bar per rendered line, with a naturally shorter last line.
+  - **Content**: `<img>`, `<input>`, `<button>`, `<textarea>`, `<select>`.
+  - **Containers**: Cards and sections with borders/backgrounds/shadows render as static outlines.
+- 🧘 **No Layout Shift**: The real content holds its space while loading.
+- ⏱️ **No Flicker**: Optional `delay` / `minDuration`, plus a crossfade on reveal.
+- ♿ **Accessible**: Hidden content is `inert`, the wrapper is `aria-busy`, and loading is announced.
+- 🎨 **Customizable**: Colors, radius, pulse/shimmer/none, light/dark, per-element overrides.
+- 🪶 **Zero runtime dependencies**, `'use client'`-ready for Next.js.
 
 ## 📦 Installation
 
@@ -41,63 +43,65 @@ _Zero runtime dependencies — only `react` (19+) as a peer._
 
 ## 🚀 Usage
 
-### 1. Basic Example
+> [!IMPORTANT]
+> **AutoSkeleton measures what is rendered.** While loading, render your component with
+> realistic **placeholder data**: an empty `<h3></h3>` or a missing image has no size, so
+> it gets no skeleton. This is the one thing to remember.
 
-Wrap your component in `AutoSkeleton` and control the `loading` state.
+### 1. Data fetching (the template pattern)
+
+You usually start with no data. Render a few "template" items with placeholder data while
+loading. AutoSkeleton measures them and draws the skeleton, then crossfades to the real
+items.
 
 ```tsx
 import { AutoSkeleton } from 'smart-skeleton-loader';
 
-const UserProfile = ({ loading, user }) => {
+const TEMPLATE_USERS = Array.from({ length: 3 }, (_, i) => ({
+  id: `template-${i}`,
+  name: 'Template User Name',
+  bio: 'A template bio, about as long as a real one.',
+  avatar: '/placeholder.png',
+}));
+
+const UserList = () => {
+  const { data, isLoading } = useFetchUsers();
+  const users = isLoading ? TEMPLATE_USERS : data;
+
   return (
-    <AutoSkeleton loading={loading}>
-      <div className="card">
-        {/* Use a placeholder fallback so the skeleton knows the size if data is null! */}
-        <img src={user?.avatar || '/placeholder.png'} alt="Avatar" />
-        <h3>{user?.name || 'Loading Name...'}</h3>
-        <p>{user?.bio || 'This is a long line of text to simulate the bio.'}</p>
-        <button>Follow</button>
+    <AutoSkeleton loading={isLoading} delay={150} minDuration={400}>
+      <div className="list">
+        {users.map((user) => (
+          <UserCard key={user.id} {...user} />
+        ))}
       </div>
     </AutoSkeleton>
   );
 };
 ```
 
-### 2. Data Fetching (The Template Pattern)
+### 2. A single component
 
-When fetching lists, you might start with an empty array. **How can we measure an empty array?**
-
-The solution is the **Template Pattern**: Render "dummy" items while loading. `smart-skeleton-loader` will measure these dummies and create the skeleton layout.
+Give each field a placeholder fallback so it has a size while `user` is still `null`.
 
 ```tsx
-const UserList = () => {
-  const { data, isLoading } = useFetchUsers();
-
-  return (
-    <div className="list">
-      {isLoading
-        ? // RENDER 3 TEMPLATES WHILE LOADING
-          Array.from({ length: 3 }).map((_, i) => (
-            <AutoSkeleton key={i} loading={true}>
-              <UserCard
-                name="Template User Name"
-                bio="This is a template bio for measurement."
-                avatar="/placeholder.png"
-              />
-            </AutoSkeleton>
-          ))
-        : // RENDER REAL DATA
-          data.map((user) => <UserCard key={user.id} {...user} />)}
+const UserProfile = ({ loading, user }) => (
+  <AutoSkeleton loading={loading}>
+    <div className="card">
+      <img src={user?.avatar ?? '/placeholder.png'} alt="Avatar" />
+      <h3>{user?.name ?? 'Placeholder Name'}</h3>
+      <p>{user?.bio ?? 'A line of text about as long as a real bio.'}</p>
+      <button>Follow</button>
     </div>
-  );
-};
+  </AutoSkeleton>
+);
 ```
 
 ### 3. Container Detection (Cards)
 
 `smart-skeleton-loader` intelligently distinguishes between **Content** and **Containers**.
 
-- **Content** (Text, Images, Buttons) -> Renders as a **Pulsing Gray Box**.
+- **Content** (Text, Images, Buttons) -> Renders as **animated bars** (one per text line).
 - **Containers** (Elements with visible `border`, `background-color`, or `box-shadow`) -> Renders as a **Static Clone** (with your exact styles) and **NO** pulse.
 
 This means a "Card" looks like a card (white background, shadow), and the content inside it pulses.
@@ -123,7 +127,7 @@ Customize the appearance via the `config` prop:
 
 | Prop           | Type            | Default      | Description                                                                    |
 | -------------- | --------------- | ------------ | ------------------------------------------------------------------------------ |
-| `loading`      | `boolean`       | `true`       | Whether to show the skeleton or the actual content.                            |
+| `loading`      | `boolean`       | _required_   | Whether to show the skeleton or the actual content.                            |
 | `children`     | `ReactNode`     | -            | The content to measure.                                                        |
 | `config`       | `object`        | -            | Customization options.                                                         |
 | `loadingLabel` | `string`        | `"Loading…"` | Text announced to screen readers while loading.                                |

@@ -50,7 +50,17 @@
   },
   "author": "dashnyamb",
   "license": "MIT",
-  "description": "",
+  "description": "Zero-dependency React skeleton loader that measures your real components and draws matching skeletons automatically.",
+  "keywords": [
+    "react",
+    "skeleton",
+    "skeleton-loader",
+    "loading",
+    "placeholder",
+    "shimmer",
+    "react19",
+    "nextjs"
+  ],
   "peerDependencies": {
     "react": "^19.0.0"
   },
