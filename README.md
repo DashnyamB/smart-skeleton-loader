@@ -129,6 +129,8 @@ Customize the appearance via the `config` prop:
 | `loadingLabel` | `string`        | `"Loading…"` | Text announced to screen readers while loading.                                |
 | `className`    | `string`        | -            | Class name for the outer wrapper.                                              |
 | `style`        | `CSSProperties` | -            | Style for the outer wrapper, merged over `position: relative; display: block`. |
+| `delay`        | `number`        | `0`          | Wait this long (ms) before showing the skeleton, so fast loads never flash it. |
+| `minDuration`  | `number`        | `0`          | Once shown, keep the skeleton at least this long (ms).                         |
 
 ### Config Object
 
@@ -146,11 +148,12 @@ Customize the appearance via the `config` prop:
     - If it finds images/inputs/buttons -> It creates a **Primitive Skeleton**.
     - If it finds a styled container -> It creates a **Container Skeleton**.
 3.  **Overlay**: We render absolute positioned `divs` exactly over the measured elements.
-4.  **No Shift**: Because the hidden content is already holding the space, when `loading` becomes `false`, we simply fade `opacity` to 1. No jumping content!
+4.  **No Shift**: Because the hidden content is already holding the space, when `loading` becomes `false`, the skeleton and content crossfade. No jumping content!
 
 ## ⚠️ Notes
 
 - **Accessibility:** while `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region.
+- **Avoiding flicker:** for most data fetching use `delay={150} minDuration={400}`: loads faster than 150ms show nothing, and a skeleton that does appear stays long enough to read as intentional. The skeleton and content crossfade over 200ms.
 - **Layout:** the wrapper is `display: block`, so it fills its parent like the content it replaces. For inline content pass `style={{ display: 'inline-block' }}`.
 - **Placeholders**: For images, ensure you provide a `src` (even a placeholder) or explicit `width/height` style so the image takes up space to be measured.
 - **Opacity vs Visibility**: We use `opacity: 0` to hide content. This ensures that even elements that might behave strangely with `visibility: hidden` are correctly measured.
