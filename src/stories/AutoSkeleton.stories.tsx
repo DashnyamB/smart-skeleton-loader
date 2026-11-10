@@ -490,3 +490,44 @@ export const FullWidthLayout: Story = {
     }
   },
 };
+
+// Text: one bar per rendered line, short last line, no overlap for nested inline text
+export const MultiLineParagraph: Story = {
+  args: { loading: true, children: null },
+  render: (args) => (
+    <SideBySide args={args}>
+      <div style={{ width: 280, fontFamily: 'sans-serif' }}>
+        <h3 style={{ margin: '0 0 8px' }}>
+          Release notes for <strong>v2.0</strong>
+        </h3>
+        <p data-testid="paragraph" style={{ margin: 0, lineHeight: 1.5 }}>
+          Skeletons now follow the real shape of your text. A paragraph that
+          wraps onto several lines gets one bar per line, and the last bar is
+          only as long as the last line.
+        </p>
+      </div>
+    </SideBySide>
+  ),
+  play: async ({ canvasElement }) => {
+    // The first SideBySide column is the loading one
+    const paragraph = within(canvasElement).getAllByTestId('paragraph')[0];
+    const range = document.createRange();
+    range.selectNodeContents(paragraph.firstChild!);
+    const lineTops = new Set(
+      Array.from(range.getClientRects()).map((r) => Math.round(r.top)),
+    );
+    await expect(lineTops.size).toBeGreaterThan(1);
+
+    const p = paragraph.getBoundingClientRect();
+    const bars = within(canvasElement)
+      .getAllByTestId('skeleton')
+      .filter((bar) => {
+        const b = bar.getBoundingClientRect();
+        return b.top >= p.top - 1 && b.bottom <= p.bottom + 1;
+      });
+    await expect(bars).toHaveLength(lineTops.size);
+
+    const widths = bars.map((b) => b.getBoundingClientRect().width);
+    await expect(widths.at(-1)!).toBeLessThan(Math.max(...widths));
+  },
+};

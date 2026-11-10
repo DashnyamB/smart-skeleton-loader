@@ -142,7 +142,8 @@ Customize the appearance via the `config` prop:
 
 1.  **Invisible Measurement**: When `loading={true}`, your children are rendered in the DOM but hidden using `opacity: 0`. This allows them to take up space and be measured by the browser.
 2.  **Smart Scan**: We use a `TreeWalker` to scan the DOM elements.
-    - If it finds text/images -> It creates a **Primitive Skeleton**.
+    - If it finds text -> It creates **one bar per rendered line** (the last bar is as short as the last line).
+    - If it finds images/inputs/buttons -> It creates a **Primitive Skeleton**.
     - If it finds a styled container -> It creates a **Container Skeleton**.
 3.  **Overlay**: We render absolute positioned `divs` exactly over the measured elements.
 4.  **No Shift**: Because the hidden content is already holding the space, when `loading` becomes `false`, we simply fade `opacity` to 1. No jumping content!
