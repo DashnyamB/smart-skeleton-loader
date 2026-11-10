@@ -121,11 +121,12 @@ Customize the appearance via the `config` prop:
 
 ## 🧩 API Reference
 
-| Prop       | Type        | Default | Description                                         |
-| ---------- | ----------- | ------- | --------------------------------------------------- |
-| `loading`  | `boolean`   | `true`  | Whether to show the skeleton or the actual content. |
-| `children` | `ReactNode` | -       | The content to measure.                             |
-| `config`   | `object`    | -       | Customization options.                              |
+| Prop           | Type        | Default      | Description                                         |
+| -------------- | ----------- | ------------ | --------------------------------------------------- |
+| `loading`      | `boolean`   | `true`       | Whether to show the skeleton or the actual content. |
+| `children`     | `ReactNode` | -            | The content to measure.                             |
+| `config`       | `object`    | -            | Customization options.                              |
+| `loadingLabel` | `string`    | `"Loading…"` | Text announced to screen readers while loading.     |
 
 ### Config Object
 
@@ -141,11 +142,12 @@ Customize the appearance via the `config` prop:
 2.  **Smart Scan**: We use a `TreeWalker` to scan the DOM elements.
     - If it finds text/images -> It creates a **Primitive Skeleton**.
     - If it finds a styled container -> It creates a **Container Skeleton**.
-3.  **Overlay**: We render absolute positioned `divs` (using Framer Motion) exactly over the measured elements.
+3.  **Overlay**: We render absolute positioned `divs` exactly over the measured elements.
 4.  **No Shift**: Because the hidden content is already holding the space, when `loading` becomes `false`, we simply fade `opacity` to 1. No jumping content!
 
 ## ⚠️ Notes
 
+- **Accessibility:** while `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region.
 - **Placeholders**: For images, ensure you provide a `src` (even a placeholder) or explicit `width/height` style so the image takes up space to be measured.
 - **Opacity vs Visibility**: We use `opacity: 0` to hide content. This ensures that even elements that might behave strangely with `visibility: hidden` are correctly measured.
 
