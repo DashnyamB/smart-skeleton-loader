@@ -32,12 +32,12 @@
 ## 📦 Installation
 
 ```bash
-npm install react-auto-skeleton framer-motion
+npm install react-auto-skeleton motion
 # or
-yarn add react-auto-skeleton framer-motion
+yarn add react-auto-skeleton motion
 ```
 
-_Note: `framer-motion` is a peer dependency used for the smooth pulse animations._
+_Note: `motion` is a peer dependency used for the smooth pulse animations._
 
 ## 🚀 Usage
 

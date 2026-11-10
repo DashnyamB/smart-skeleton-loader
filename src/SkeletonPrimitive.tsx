@@ -1,4 +1,4 @@
-import { HTMLMotionProps, motion } from 'framer-motion';
+import { HTMLMotionProps, motion } from 'motion/react';
 import React from 'react';
 
 export interface SkeletonPrimitiveProps extends HTMLMotionProps<'div'> {

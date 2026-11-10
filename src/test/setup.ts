@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 // Mock ResizeObserver if it's not available (e.g., in JSDOM)
 if (typeof globalThis.ResizeObserver === 'undefined') {
