@@ -5,12 +5,40 @@ import { getTextLineBoxes } from './measure';
 /** Text bars are drawn at this fraction of the line box height, vertically centered. */
 const TEXT_BAR_RATIO = 0.7;
 
-const ATOMIC_TAGS = new Set(['IMG', 'INPUT', 'BUTTON', 'TEXTAREA', 'SELECT']);
+const MEDIA_TAGS = new Set(['IMG', 'VIDEO', 'CANVAS', 'SVG', 'PICTURE']);
+const INPUT_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
+const ATOMIC_TAGS = new Set([...MEDIA_TAGS, ...INPUT_TAGS, 'BUTTON']);
+const HEADING_TAGS = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
+/** Text at least this much larger than the surrounding text counts as a heading. */
+const HEADING_SCALE = 1.25;
+
+/** What a bar stands for; each kind can be styled separately. */
+export type BarKind =
+  | 'text'
+  | 'heading'
+  | 'avatar'
+  | 'media'
+  | 'button'
+  | 'input'
+  | 'block'
+  | 'container';
+
+export const BAR_KINDS: readonly BarKind[] = [
+  'text',
+  'heading',
+  'avatar',
+  'media',
+  'button',
+  'input',
+  'block',
+  'container',
+];
 const TRANSPARENT = new Set(['rgba(0, 0, 0, 0)', 'transparent']);
 
 export interface SkeletonBox {
   key: string;
   type: 'primitive' | 'container';
+  kind: BarKind;
   width: number;
   height: number;
   top: number;
@@ -32,7 +60,8 @@ const hasOwnText = (el: Element) =>
 
 /** Classifies an element from one computed-style read. */
 function classify(el: Element, style: CSSStyleDeclaration): Kind | null {
-  if (ATOMIC_TAGS.has(el.tagName)) return { type: 'primitive', text: false };
+  if (ATOMIC_TAGS.has(el.tagName.toUpperCase()))
+    return { type: 'primitive', text: false };
   if (hasOwnText(el)) return { type: 'primitive', text: true };
 
   const hasBackground = !TRANSPARENT.has(style.backgroundColor);
@@ -66,6 +95,38 @@ export function isOpaque(color: string): boolean {
   return a >= 1;
 }
 
+/** Round, roughly square elements (avatars) vs other media. */
+function isRound(style: CSSStyleDeclaration, rect: DOMRect): boolean {
+  const { width, height } = rect;
+  if (
+    !width ||
+    !height ||
+    Math.abs(width - height) > 0.1 * Math.max(width, height)
+  ) {
+    return false;
+  }
+  const radius = style.borderRadius;
+  if (radius.endsWith('%')) return parseFloat(radius) >= 50;
+  return parseFloat(radius) >= Math.min(width, height) / 2 - 0.5;
+}
+
+/** Kind of an atomic (non-text) element. */
+function atomicKind(
+  el: Element,
+  style: CSSStyleDeclaration,
+  rect: DOMRect,
+): BarKind {
+  const tag = el.tagName.toUpperCase();
+  if (tag === 'BUTTON') return 'button';
+  if (INPUT_TAGS.has(tag)) return 'input';
+  return isRound(style, rect) ? 'avatar' : 'media';
+}
+
+const declaredKind = (el: Element): BarKind | undefined => {
+  const value = el.getAttribute('data-skeleton-type') as BarKind | null;
+  return value && BAR_KINDS.includes(value) ? value : undefined;
+};
+
 const toCss = (r: string | number | undefined) =>
   typeof r === 'number' ? `${r}px` : r;
 
@@ -86,7 +147,9 @@ export function scanSkeletons(
   const boxes: SkeletonBox[] = [];
   let idx = 0;
   // The content's own text color is the ink of the outermost surface
-  const rootInk = window.getComputedStyle(container).color || undefined;
+  const rootStyle = window.getComputedStyle(container);
+  const rootInk = rootStyle.color || undefined;
+  const rootFontSize = parseFloat(rootStyle.fontSize) || 16;
 
   const visit = (el: Element, ink: string | undefined) => {
     // Opt-out: no skeleton for this element or anything inside it
@@ -97,12 +160,19 @@ export function scanSkeletons(
     // An opaque background starts a new surface: its text color tints the bars inside it
     const childInk = isOpaque(style.backgroundColor) ? style.color || ink : ink;
 
-    // Opt-in: draw the whole element as one block, skip its children
-    if (el.hasAttribute('data-skeleton-block')) {
+    const declared = declaredKind(el);
+
+    // Opt-in: draw the whole element as one block, skip its children.
+    // A declared non-text kind (e.g. an initials avatar) is drawn the same way.
+    if (
+      el.hasAttribute('data-skeleton-block') ||
+      (declared && declared !== 'text' && declared !== 'heading')
+    ) {
       const rect = el.getBoundingClientRect();
       boxes.push({
         key: `${idx++}`,
         type: 'primitive',
+        kind: declared ?? 'block',
         width: rect.width,
         height: rect.height,
         top: rect.top - origin.top,
@@ -118,6 +188,12 @@ export function scanSkeletons(
     }
 
     const kind = classify(el, style);
+    const textKind: BarKind =
+      declared ??
+      (HEADING_TAGS.has(el.tagName.toUpperCase()) ||
+      parseFloat(style.fontSize) >= rootFontSize * HEADING_SCALE
+        ? 'heading'
+        : 'text');
     if (kind?.type === 'primitive' && kind.text) {
       const lines = getTextLineBoxes(el);
       for (const line of lines) {
@@ -125,6 +201,7 @@ export function scanSkeletons(
         boxes.push({
           key: `${idx++}`,
           type: 'primitive',
+          kind: textKind,
           width: line.width,
           height,
           top: line.top + (line.height - height) / 2 - origin.top,
@@ -148,9 +225,15 @@ export function scanSkeletons(
       if (kind.type === 'primitive' && (!radius || radius === '0px')) {
         radius = el.tagName === 'BUTTON' ? '6px' : '4px';
       }
+      let barKind: BarKind;
+      if (declared) barKind = declared;
+      else if (kind.type === 'container') barKind = 'container';
+      else if (kind.text) barKind = textKind; // text we could not split into lines
+      else barKind = atomicKind(el, style, rect);
       boxes.push({
         key: `${idx++}`,
         type: kind.type,
+        kind: barKind,
         width: rect.width,
         height: rect.height,
         top: rect.top - origin.top,
@@ -170,6 +253,7 @@ export function scanSkeletons(
     boxes.push({
       key: 'fallback',
       type: 'primitive',
+      kind: 'block',
       width: origin.width,
       height: origin.height,
       top: 0,
@@ -188,6 +272,7 @@ export function sameBoxes(a: SkeletonBox[], b: SkeletonBox[]): boolean {
     const y = b[i];
     return (
       x.type === y.type &&
+      x.kind === y.kind &&
       x.width === y.width &&
       x.height === y.height &&
       x.top === y.top &&

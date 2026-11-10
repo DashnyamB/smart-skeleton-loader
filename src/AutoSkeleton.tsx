@@ -6,7 +6,12 @@ import React, {
   useState,
 } from 'react';
 
-import { sameBoxes, scanSkeletons, type SkeletonBox } from './scan';
+import {
+  sameBoxes,
+  scanSkeletons,
+  type BarKind,
+  type SkeletonBox,
+} from './scan';
 import { SkeletonPrimitive, type SkeletonAnimation } from './SkeletonPrimitive';
 import { useSkeletonConfig } from './SkeletonProvider';
 import { useDisplayedLoading } from './useDisplayedLoading';
@@ -48,6 +53,10 @@ export interface AutoSkeletonProps {
     theme?: 'light' | 'dark' | 'auto';
     /** `pulse` (default), `shimmer`, or `none`. */
     animation?: SkeletonAnimation;
+    /** Extra class names per kind of bar, e.g. `{ avatar: 'ring-2', heading: 'w-1/2' }`. */
+    classNames?: Partial<Record<BarKind, string>>;
+    /** Extra inline styles per kind of bar; merged over the measured size and position. */
+    styles?: Partial<Record<BarKind, React.CSSProperties>>;
     // Theme-specific colors (override CSS variables)
     lightColor?: string;
     lightHighlightColor?: string;
@@ -269,9 +278,13 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
             >
               {sk.type === 'primitive' ? (
                 <SkeletonPrimitive
+                  kind={sk.kind}
+                  className={config?.classNames?.[sk.kind]}
+                  style={config?.styles?.[sk.kind]}
                   width={sk.width}
                   height={sk.height}
-                  borderRadius={sk.borderRadius}
+                  // Per-kind radius token, e.g. --auto-skeleton-avatar-radius
+                  borderRadius={`var(--auto-skeleton-${sk.kind}-radius, ${sk.borderRadius})`}
                   adaptive={adaptive}
                   ink={config?.adaptive === 'inherit' ? undefined : sk.ink}
                   color={effectiveColors.color}
@@ -281,6 +294,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
               ) : (
                 /* Container Clone: Renders static style */
                 <div
+                  className={config?.classNames?.container}
+                  data-skeleton-kind="container"
                   style={{
                     width: sk.width,
                     height: sk.height,
@@ -289,6 +304,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
                     // Ensure it doesn't hide children if z-index issues arise,
                     // but since we render in DOM order, children come later and sit on top.
                     boxSizing: 'border-box',
+                    ...config?.styles?.container,
                   }}
                 />
               )}

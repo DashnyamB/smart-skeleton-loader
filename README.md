@@ -175,6 +175,36 @@ Prefer CSS? Set `--auto-skeleton-color` and `--auto-skeleton-highlight` globally
 
 Color precedence: `color` props › `--auto-skeleton-color` CSS variable › adaptive. `config.color: 'static'` or an explicit `theme: 'light' | 'dark'` uses the fixed greys instead.
 
+### Styling each kind of bar
+
+Every bar knows what it stands for: `text`, `heading`, `avatar`, `media`, `button`, `input`, `block` or `container`. Target them with classes (Tailwind works), inline styles, or plain CSS:
+
+```tsx
+<AutoSkeleton
+  loading={isLoading}
+  config={{
+    classNames: { avatar: 'ring-2 ring-offset-2', heading: 'w-1/2' },
+    styles: { media: { opacity: 0.6 } },
+  }}
+>
+  <PostCard />
+</AutoSkeleton>
+```
+
+```css
+/* Each bar has .auto-skeleton--{kind} and [data-skeleton-kind] */
+.auto-skeleton--media {
+  opacity: 0.6;
+}
+/* Per-kind radius tokens */
+:root {
+  --auto-skeleton-heading-radius: 999px;
+  --auto-skeleton-avatar-radius: 50%;
+}
+```
+
+Detection is automatic (headings by tag or a font size at least 1.25× the surrounding text, avatars as round, square images). Override it on any element with `data-skeleton-type="avatar"`; a non-text type draws the element as one bar, like `data-skeleton-block`.
+
 ### App-wide defaults
 
 Wrap your app once instead of repeating `config` everywhere. Props on an individual `<AutoSkeleton>` still win, key by key, and nested providers merge over outer ones.
@@ -227,16 +257,18 @@ import { SkeletonPrimitive } from 'smart-skeleton-loader';
 | `borderRadius`                       | `string \| number`                 | `4px`        | Fallback radius (auto-detected from your elements first).                                                     |
 | `theme`                              | `'light' \| 'dark' \| 'auto'`      | `'auto'`     | `'light'`/`'dark'` force the fixed palette for that theme. Not needed with adaptive color.                    |
 | `animation`                          | `'pulse' \| 'shimmer' \| 'none'`   | `'pulse'`    | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.                  |
+| `classNames` / `styles`              | `Partial<Record<BarKind, …>>`      | -            | Extra class names / inline styles per kind of bar.                                                            |
 | `adaptive`                           | `'surface' \| 'inherit'`           | `'surface'`  | Adaptive ink from each surface's text color, or one tint everywhere from the wrapper's text color.            |
 | `lightColor` / `lightHighlightColor` | `string`                           | -            | Colors used when the (resolved) theme is light.                                                               |
 | `darkColor` / `darkHighlightColor`   | `string`                           | -            | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme.             |
 
 ### Per-element attributes
 
-| Attribute              | Effect                                                                                    |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `data-skeleton-ignore` | No skeleton for this element or anything inside it (e.g. decorative badges).              |
-| `data-skeleton-block`  | Draw the element as one block and skip its children (e.g. charts, maps, complex widgets). |
+| Attribute              | Effect                                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `data-skeleton-ignore` | No skeleton for this element or anything inside it (e.g. decorative badges).                                                   |
+| `data-skeleton-block`  | Draw the element as one block and skip its children (e.g. charts, maps, complex widgets).                                      |
+| `data-skeleton-type`   | Set the bar kind (`text`, `heading`, `avatar`, `media`, `button`, `input`, `block`, `container`). Non-text kinds draw one bar. |
 
 ## 🛠 How it works
 
