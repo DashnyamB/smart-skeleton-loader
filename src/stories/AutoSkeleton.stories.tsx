@@ -710,3 +710,68 @@ export const LargeList: StoryObj<{ rows: number }> = {
     await expect(canvas.getAllByTestId('skeleton')).toHaveLength(args.rows);
   },
 };
+
+// Animation styles and default colors (no CSS import needed)
+const AnimationCard = () => (
+  <div style={{ width: 220, fontFamily: 'sans-serif' }}>
+    <h4 style={{ margin: '0 0 8px' }}>Animation preview</h4>
+    <p style={{ margin: 0 }}>Default colors, no stylesheet imported.</p>
+  </div>
+);
+
+export const AnimationStyles: Story = {
+  args: { loading: true, children: null },
+  parameters: { layout: 'padded' },
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {(['pulse', 'shimmer', 'none'] as const).map((animation) => (
+        <div key={animation} style={{ display: 'flex', gap: 24 }}>
+          {(['light', 'dark'] as const).map((theme) => (
+            <div
+              key={theme}
+              data-testid={`${animation}-${theme}`}
+              style={{
+                padding: 16,
+                borderRadius: 8,
+                background: theme === 'dark' ? '#111' : '#fff',
+              }}
+            >
+              <p
+                style={{
+                  margin: '0 0 8px',
+                  font: '12px sans-serif',
+                  color: '#888',
+                }}
+              >
+                {animation} / {theme}
+              </p>
+              <AutoSkeleton loading config={{ animation, theme }}>
+                <AnimationCard />
+              </AutoSkeleton>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const bar = (id: string) =>
+      within(within(canvasElement).getByTestId(id)).getAllByTestId(
+        'skeleton',
+      )[0];
+    const animationName = (id: string) =>
+      getComputedStyle(bar(id)).animationName;
+
+    await expect(animationName('pulse-light')).toBe('auto-skeleton-pulse');
+    await expect(animationName('shimmer-light')).toBe('auto-skeleton-shimmer');
+    await expect(animationName('none-light')).toBe('none');
+
+    // Static bars show the base color: light and dark defaults without styles.css
+    await expect(getComputedStyle(bar('none-light')).backgroundColor).toBe(
+      'rgb(224, 224, 224)',
+    );
+    await expect(getComputedStyle(bar('none-dark')).backgroundColor).toBe(
+      'rgb(42, 42, 42)',
+    );
+  },
+};

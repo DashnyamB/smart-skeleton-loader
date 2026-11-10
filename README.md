@@ -134,14 +134,15 @@ Customize the appearance via the `config` prop:
 
 ### Config Object
 
-| Key                                  | Type                          | Default   | Description                                                                                       |
-| ------------------------------------ | ----------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
-| `color`                              | `string`                      | `#eee`    | Background color of primitives.                                                                   |
-| `highlightColor`                     | `string`                      | `#f5f5f5` | Animation highlight color.                                                                        |
-| `borderRadius`                       | `string`                      | `4px`     | Fallback radius (Auto-detection is attempted first).                                              |
-| `theme`                              | `'light' \| 'dark' \| 'auto'` | `'auto'`  | Force a theme, or follow the OS color scheme.                                                     |
-| `lightColor` / `lightHighlightColor` | `string`                      | -         | Colors used when the (resolved) theme is light.                                                   |
-| `darkColor` / `darkHighlightColor`   | `string`                      | -         | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme. |
+| Key                                  | Type                             | Default   | Description                                                                                       |
+| ------------------------------------ | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| `color`                              | `string`                         | `#e0e0e0` | Background color of primitives.                                                                   |
+| `highlightColor`                     | `string`                         | `#f2f2f2` | Animation highlight color.                                                                        |
+| `borderRadius`                       | `string`                         | `4px`     | Fallback radius (Auto-detection is attempted first).                                              |
+| `theme`                              | `'light' \| 'dark' \| 'auto'`    | `'auto'`  | Force a theme, or follow the OS color scheme.                                                     |
+| `animation`                          | `'pulse' \| 'shimmer' \| 'none'` | `'pulse'` | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.      |
+| `lightColor` / `lightHighlightColor` | `string`                         | -         | Colors used when the (resolved) theme is light.                                                   |
+| `darkColor` / `darkHighlightColor`   | `string`                         | -         | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme. |
 
 ## 🛠 How It Works
 
@@ -158,6 +159,7 @@ Customize the appearance via the `config` prop:
 - **Accessibility:** while `loading`, the real content is `inert` (no clicks, no Tab focus, hidden from assistive tech), the wrapper has `aria-busy`, and `loadingLabel` is announced through a `role="status"` region.
 - **Avoiding flicker:** for most data fetching use `delay={150} minDuration={400}`: loads faster than 150ms show nothing, and a skeleton that does appear stays long enough to read as intentional. The skeleton and content crossfade over 200ms.
 - **Server rendering / Next.js:** the package is marked `'use client'`, so it can be imported from Server Components. Server-rendered HTML shows one pulsing block over the reserved space until hydration, then switches to measured skeletons.
+- **Default colors:** light `#e0e0e0`/`#f2f2f2`, dark `#2a2a2a`/`#3d3d3d`, chosen by OS scheme or `theme`, with no CSS import needed. `styles.css` is optional: import it, or set `--auto-skeleton-color` / `--auto-skeleton-highlight` yourself, to theme globally (it also supports a `.dark` class).
 - **Layout:** the wrapper is `display: block`, so it fills its parent like the content it replaces. For inline content pass `style={{ display: 'inline-block' }}`.
 - **Placeholders**: For images, ensure you provide a `src` (even a placeholder) or explicit `width/height` style so the image takes up space to be measured.
 - **Opacity vs Visibility**: We use `opacity: 0` to hide content. This ensures that even elements that might behave strangely with `visibility: hidden` are correctly measured.
