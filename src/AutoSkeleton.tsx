@@ -1,4 +1,5 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
+
 import { SkeletonPrimitive } from './SkeletonPrimitive';
 
 export interface AutoSkeletonProps {
