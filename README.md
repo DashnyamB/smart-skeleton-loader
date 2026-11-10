@@ -175,6 +175,24 @@ Prefer CSS? Set `--auto-skeleton-color` and `--auto-skeleton-highlight` globally
 
 Color precedence: `color` props › `--auto-skeleton-color` CSS variable › adaptive. `config.color: 'static'` or an explicit `theme: 'light' | 'dark'` uses the fixed greys instead.
 
+### App-wide defaults
+
+Wrap your app once instead of repeating `config` everywhere. Props on an individual `<AutoSkeleton>` still win, key by key, and nested providers merge over outer ones.
+
+```tsx
+import { SkeletonProvider } from 'smart-skeleton-loader';
+
+<SkeletonProvider
+  config={{ animation: 'shimmer', borderRadius: 8 }}
+  delay={200}
+  loadingLabel="Loading content"
+>
+  <App />
+</SkeletonProvider>;
+```
+
+Want every skeleton in the app to share exactly one tint, whatever surface it is on? Use `config={{ adaptive: 'inherit' }}`. The default, `'surface'`, tints each surface from its own text color.
+
 ### Hand-placed skeletons
 
 Need a one-off placeholder outside AutoSkeleton? The same building block is exported:
@@ -209,6 +227,7 @@ import { SkeletonPrimitive } from 'smart-skeleton-loader';
 | `borderRadius`                       | `string \| number`                 | `4px`        | Fallback radius (auto-detected from your elements first).                                                     |
 | `theme`                              | `'light' \| 'dark' \| 'auto'`      | `'auto'`     | `'light'`/`'dark'` force the fixed palette for that theme. Not needed with adaptive color.                    |
 | `animation`                          | `'pulse' \| 'shimmer' \| 'none'`   | `'pulse'`    | Pulse the color, sweep a highlight, or stay static. Disabled under `prefers-reduced-motion`.                  |
+| `adaptive`                           | `'surface' \| 'inherit'`           | `'surface'`  | Adaptive ink from each surface's text color, or one tint everywhere from the wrapper's text color.            |
 | `lightColor` / `lightHighlightColor` | `string`                           | -            | Colors used when the (resolved) theme is light.                                                               |
 | `darkColor` / `darkHighlightColor`   | `string`                           | -            | Colors used when the (resolved) theme is dark. With `'auto'` they switch live with the OS scheme.             |
 
