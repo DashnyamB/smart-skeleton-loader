@@ -32,8 +32,14 @@ describe('useDisplayedLoading', () => {
     expect(result.current).toBe(false);
   });
 
-  it('waits for `delay` before showing', () => {
+  it('shows immediately on mount, even with a delay (nothing to keep on screen yet)', () => {
     const { result } = setup(true, { delay: 150 });
+    expect(result.current).toBe(true);
+  });
+
+  it('waits for `delay` when loading starts after mount', () => {
+    const { result, rerender } = setup(false, { delay: 150 });
+    rerender({ loading: true });
     expect(result.current).toBe(false);
     advance(100);
     expect(result.current).toBe(false);
@@ -41,12 +47,17 @@ describe('useDisplayedLoading', () => {
     expect(result.current).toBe(true);
   });
 
-  it('never shows when loading ends before `delay`', () => {
-    const { result, rerender } = setup(true, { delay: 150 });
+  it('never shows when a refetch ends before `delay`', () => {
+    const { result, rerender } = setup(false, { delay: 150 });
+    const seen: boolean[] = [];
+    rerender({ loading: true });
+    seen.push(result.current);
     advance(100);
+    seen.push(result.current);
     rerender({ loading: false });
     advance(500);
-    expect(result.current).toBe(false);
+    seen.push(result.current);
+    expect(seen).toEqual([false, false, false]);
   });
 
   it('keeps the skeleton for `minDuration` once shown', () => {
@@ -125,7 +136,7 @@ describe('AutoSkeleton reveal timing', () => {
     expect(content).toHaveStyle({ opacity: '0', transition: 'none' });
   });
 
-  it('keeps content hidden during `delay` without showing a skeleton', () => {
+  it('shows the skeleton immediately on mount despite a delay', () => {
     render(
       <AutoSkeleton loading delay={150}>
         <div data-testid="content">Content</div>
@@ -134,8 +145,30 @@ describe('AutoSkeleton reveal timing', () => {
     expect(screen.getByTestId('content').parentElement).toHaveStyle({
       opacity: '0',
     });
-    expect(screen.queryByTestId('skeleton-overlay')).toBeNull();
-    advance(150);
     expect(screen.getByTestId('skeleton-overlay')).toBeInTheDocument();
+  });
+
+  it('defaults to delay 150 / minDuration 400', () => {
+    const at = (loading: boolean) => (
+      <AutoSkeleton loading={loading}>
+        <div data-testid="content">Content</div>
+      </AutoSkeleton>
+    );
+    const { rerender } = render(at(false));
+    rerender(at(true)); // refetch
+    advance(149);
+    expect(screen.queryByTestId('skeleton-overlay')).toBeNull();
+    advance(1);
+    expect(screen.getByTestId('skeleton-overlay')).toBeInTheDocument();
+
+    rerender(at(false));
+    advance(399); // held for minDuration
+    expect(screen.getByTestId('skeleton-overlay')).toHaveStyle({
+      opacity: '1',
+    });
+    advance(1);
+    expect(screen.getByTestId('skeleton-overlay')).toHaveStyle({
+      opacity: '0',
+    });
   });
 });

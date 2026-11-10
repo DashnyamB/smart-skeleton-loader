@@ -15,7 +15,7 @@ describe('AutoSkeleton accessibility', () => {
 
   it('makes content inert while loading and restores it after', () => {
     const { rerender } = render(
-      <AutoSkeleton loading>
+      <AutoSkeleton loading minDuration={0}>
         <Card />
       </AutoSkeleton>,
     );
@@ -23,7 +23,7 @@ describe('AutoSkeleton accessibility', () => {
     expect(contentWrapper).toHaveAttribute('inert');
 
     rerender(
-      <AutoSkeleton loading={false}>
+      <AutoSkeleton loading={false} minDuration={0}>
         <Card />
       </AutoSkeleton>,
     );
@@ -32,7 +32,7 @@ describe('AutoSkeleton accessibility', () => {
 
   it('toggles aria-busy on the wrapper', () => {
     const { container, rerender } = render(
-      <AutoSkeleton loading>
+      <AutoSkeleton loading minDuration={0}>
         <Card />
       </AutoSkeleton>,
     );
@@ -40,7 +40,7 @@ describe('AutoSkeleton accessibility', () => {
     expect(wrapper).toHaveAttribute('aria-busy', 'true');
 
     rerender(
-      <AutoSkeleton loading={false}>
+      <AutoSkeleton loading={false} minDuration={0}>
         <Card />
       </AutoSkeleton>,
     );
@@ -49,7 +49,7 @@ describe('AutoSkeleton accessibility', () => {
 
   it('announces the loading state through a status region', () => {
     const { rerender } = render(
-      <AutoSkeleton loading>
+      <AutoSkeleton loading minDuration={0}>
         <Card />
       </AutoSkeleton>,
     );
@@ -57,7 +57,7 @@ describe('AutoSkeleton accessibility', () => {
     expect(status).toHaveTextContent('Loading…');
 
     rerender(
-      <AutoSkeleton loading={false}>
+      <AutoSkeleton loading={false} minDuration={0}>
         <Card />
       </AutoSkeleton>,
     );

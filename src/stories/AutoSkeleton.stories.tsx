@@ -574,7 +574,7 @@ const RevealTimingDemo = ({
       <div style={{ display: 'flex', gap: 24 }}>
         <div data-testid="naive">
           <p style={{ fontSize: 12, color: '#666' }}>Naive (0 / 0)</p>
-          <AutoSkeleton loading={loading}>
+          <AutoSkeleton loading={loading} delay={0} minDuration={0}>
             <TimingCard title="No timing" />
           </AutoSkeleton>
         </div>

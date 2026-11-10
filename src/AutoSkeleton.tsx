@@ -23,9 +23,12 @@ export interface AutoSkeletonProps {
   className?: string;
   /** Style for the outer wrapper; merged over the defaults (`position: relative; display: block`). */
   style?: React.CSSProperties;
-  /** Wait this long (ms) before showing the skeleton, so fast loads never flash it. */
+  /**
+   * When `loading` turns on after mount, wait this long (ms) before showing the
+   * skeleton, so fast refetches never flash it. Not applied on mount. Default 150.
+   */
   delay?: number;
-  /** Once shown, keep the skeleton at least this long (ms). */
+  /** Once shown, keep the skeleton at least this long (ms). Default 400. */
   minDuration?: number;
   config?: {
     color?: string;
@@ -60,8 +63,8 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   loadingLabel = 'Loading…',
   className,
   style,
-  delay = 0,
-  minDuration = 0,
+  delay = 150,
+  minDuration = 400,
   config,
 }) => {
   const theme = config?.theme || 'auto';
