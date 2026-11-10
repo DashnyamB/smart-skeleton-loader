@@ -4,6 +4,7 @@ import { renderToString } from 'react-dom/server';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { AutoSkeleton } from '../AutoSkeleton';
+import { SkeletonProvider } from '../SkeletonProvider';
 
 const meta = {
   title: 'Components/AutoSkeleton',
@@ -955,5 +956,98 @@ export const AdaptiveColor: Story = {
     await waitFor(() =>
       expect(lightness(barColor('page'))).toBeGreaterThan(0.5),
     );
+  },
+};
+
+// App-wide defaults through <SkeletonProvider>
+export const ProviderDefaults: Story = {
+  args: { loading: true, children: null },
+  parameters: { layout: 'padded' },
+  render: () => (
+    <SkeletonProvider config={{ animation: 'shimmer', borderRadius: 999 }}>
+      <div style={{ display: 'flex', gap: 24, font: '14px sans-serif' }}>
+        <div data-testid="from-provider-1" style={{ width: 240 }}>
+          <p>Provider defaults</p>
+          <AutoSkeleton loading>
+            <ProfileRow />
+          </AutoSkeleton>
+        </div>
+        <div data-testid="from-provider-2" style={{ width: 240 }}>
+          <p>Provider defaults</p>
+          <AutoSkeleton loading>
+            <ProfileRow />
+          </AutoSkeleton>
+        </div>
+        <div data-testid="overridden" style={{ width: 240 }}>
+          <p>Instance override: pulse, 4px</p>
+          <AutoSkeleton
+            loading
+            config={{ animation: 'pulse', borderRadius: 4 }}
+          >
+            <ProfileRow />
+          </AutoSkeleton>
+        </div>
+      </div>
+    </SkeletonProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const firstBar = (id: string) =>
+      within(canvas.getByTestId(id)).getAllByTestId('skeleton')[0];
+    await expect(
+      getComputedStyle(firstBar('from-provider-1')).animationName,
+    ).toBe('auto-skeleton-shimmer');
+    await expect(
+      getComputedStyle(firstBar('from-provider-2')).animationName,
+    ).toBe('auto-skeleton-shimmer');
+    await expect(getComputedStyle(firstBar('overridden')).animationName).toBe(
+      'auto-skeleton-pulse',
+    );
+  },
+};
+
+// 'surface' tints per surface; 'inherit' uses one tint everywhere
+export const InheritVsSurface: Story = {
+  args: { loading: true, children: null },
+  parameters: { layout: 'padded' },
+  render: () => (
+    <div
+      style={{
+        display: 'flex',
+        gap: 24,
+        font: '14px sans-serif',
+        color: '#222',
+      }}
+    >
+      {(['surface', 'inherit'] as const).map((mode) => (
+        <div key={mode} data-testid={`mode-${mode}`} style={{ width: 300 }}>
+          <p>adaptive: '{mode}'</p>
+          <AutoSkeleton loading config={{ adaptive: mode }}>
+            <div
+              style={{
+                padding: 16,
+                borderRadius: 8,
+                background: '#0f172a',
+                color: '#e2e8f0',
+              }}
+            >
+              <ProfileRow />
+            </div>
+          </AutoSkeleton>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bar = (mode: string) =>
+      getComputedStyle(
+        within(canvas.getByTestId(`mode-${mode}`)).getAllByTestId(
+          'skeleton',
+        )[0],
+      ).backgroundColor;
+    // Inside the dark card: surface → light ink, inherit → the page's dark ink
+    await expect(lightness(bar('surface'))).toBeGreaterThan(0.5);
+    await expect(lightness(bar('inherit'))).toBeLessThan(0.5);
   },
 };

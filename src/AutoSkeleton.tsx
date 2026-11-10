@@ -8,6 +8,7 @@ import React, {
 
 import { sameBoxes, scanSkeletons, type SkeletonBox } from './scan';
 import { SkeletonPrimitive, type SkeletonAnimation } from './SkeletonPrimitive';
+import { useSkeletonConfig } from './SkeletonProvider';
 import { useDisplayedLoading } from './useDisplayedLoading';
 import { usePrefersDark } from './usePrefersDark';
 
@@ -36,6 +37,12 @@ export interface AutoSkeletonProps {
      * match any theme; `'static'` uses fixed light/dark greys; any CSS color sets it.
      */
     color?: 'adaptive' | 'static' | (string & {});
+    /**
+     * Where adaptive ink comes from. `'surface'` (default): each surface's own
+     * text color. `'inherit'`: the wrapper's text color everywhere, so every
+     * skeleton in the app gets the same tint.
+     */
+    adaptive?: 'surface' | 'inherit';
     highlightColor?: string;
     borderRadius?: string | number;
     theme?: 'light' | 'dark' | 'auto';
@@ -64,13 +71,21 @@ const VISUALLY_HIDDEN: React.CSSProperties = {
 export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
   loading,
   children,
-  loadingLabel = 'Loading…',
+  loadingLabel: labelProp,
   className,
   style,
-  delay = 150,
-  minDuration = 400,
-  config,
+  delay: delayProp,
+  minDuration: minDurationProp,
+  config: configProp,
 }) => {
+  // Instance props win over <SkeletonProvider> defaults
+  const defaults = useSkeletonConfig();
+  const config = defaults.config
+    ? { ...defaults.config, ...configProp }
+    : configProp;
+  const loadingLabel = labelProp ?? defaults.loadingLabel ?? 'Loading…';
+  const delay = delayProp ?? defaults.delay ?? 150;
+  const minDuration = minDurationProp ?? defaults.minDuration ?? 400;
   const theme = config?.theme || 'auto';
   const colorMode = config?.color;
   // Adaptive unless a fixed palette was asked for (static mode or an explicit theme)
@@ -258,7 +273,7 @@ export const AutoSkeleton: React.FC<AutoSkeletonProps> = ({
                   height={sk.height}
                   borderRadius={sk.borderRadius}
                   adaptive={adaptive}
-                  ink={sk.ink}
+                  ink={config?.adaptive === 'inherit' ? undefined : sk.ink}
                   color={effectiveColors.color}
                   highlightColor={effectiveColors.highlightColor}
                   animation={config?.animation}
