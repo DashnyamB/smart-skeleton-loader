@@ -96,7 +96,7 @@
     "playwright": "^1.65.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "semantic-release": "^25.0.9",
+    "semantic-release": "^26.0.0",
     "storybook": "^10.6.6",
     "tsup": "^9.0.0",
     "typescript": "^6.0.3",
